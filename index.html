@@ -581,6 +581,14 @@ if (!S.set.url && DEFAULT_URL) S.set.url = DEFAULT_URL;
 const remote = () => !!S.set.url;
 const canWrite = () => !remote() || S.set.role !== 'view';
 const isAdmin = () => !remote() || S.set.role === 'admin';
+const canManage = () => !remote() || S.set.role === 'admin' || S.set.role === 'own';
+// admin-only view filter: show only the records entered by one user
+function VDB() {
+  const v = S.set.viewAs;
+  if (!v || S.set.role !== 'admin') return S.db;
+  const tx = S.db.txns.filter(t => (t.by || '') === v), ids = new Set(tx.map(t => t.id));
+  return { txns: tx, pays: S.db.pays.filter(p => ids.has(p.tx)) };
+}
 const today = () => C.todayISO();
 const persist = () => { ls.set(LS.db, S.db); ls.set(LS.out, S.out); ls.set(LS.rev, S.rev); ls.set(LS.set, S.set); };
 
@@ -626,10 +634,11 @@ const AUTH_ERR = /الرقم السري|محاولات|غيّر الرقم/;
 function setStatus(s) { S.status = s; const el = $('#sync'); if (el) el.innerHTML = syncHtml(); }
 function syncHtml() {
   if (!remote()) return '<span class="dot loc"></span>محلي';
+  const vw = (S.set.viewAs && S.set.role === 'admin') ? ' · عرض: ' + esc(S.set.viewAs) : '';
   const n = S.out.length;
-  if (S.status === 'wait') return '<span class="dot wait"></span>مزامنة…';
-  if (S.status === 'off') return '<span class="dot off"></span>غير متصل' + (n ? ' (' + n + ' معلّق)' : '');
-  return '<span class="dot"></span>' + (n ? n + ' معلّق' : 'متزامن');
+  if (S.status === 'wait') return '<span class="dot wait"></span>مزامنة…' + vw;
+  if (S.status === 'off') return '<span class="dot off"></span>غير متصل' + (n ? ' (' + n + ' معلّق)' : '') + vw;
+  return '<span class="dot"></span>' + (n ? n + ' معلّق' : 'متزامن') + vw;
 }
 async function flush() {
   if (!remote() || S.busy) return;
@@ -699,11 +708,11 @@ function txCard(t, idx, showDate) {
 
 /* ---------------- HOME ---------------- */
 function viewHome() {
-  const td = today(), idx = C.buildIndex(S.db);
-  const R = C.summarize(S.db, td, td);
-  const pos = C.position(S.db, td);
-  const mon = C.getRange('month', td, 0), RM = C.summarize(S.db, mon.start, td);
-  const last = S.db.txns.filter(C.isActive).slice().sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || ''))).slice(0, 6);
+  const td = today(), idx = C.buildIndex(VDB());
+  const R = C.summarize(VDB(), td, td);
+  const pos = C.position(VDB(), td);
+  const mon = C.getRange('month', td, 0), RM = C.summarize(VDB(), mon.start, td);
+  const last = VDB().txns.filter(C.isActive).slice().sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || ''))).slice(0, 6);
   const alerts = [];
   if (pos.ar.overdue > 0) alerts.push(['bad', '⚠', 'متأخر لنا عند العملاء', pos.ar.overdue, 'ar']);
   if (pos.ap.overdue > 0) alerts.push(['bad', '⚠', 'متأخر علينا للموردين', pos.ap.overdue, 'ap']);
@@ -731,8 +740,8 @@ function viewHome() {
 
 /* ---------------- TRANSACTIONS ---------------- */
 function viewTx() {
-  const idx = C.buildIndex(S.db), f = S.tx.f, q = C.nameKey(S.tx.q || '');
-  let list = S.db.txns.slice();
+  const idx = C.buildIndex(VDB()), f = S.tx.f, q = C.nameKey(S.tx.q || '');
+  let list = VDB().txns.slice();
   if (f !== 'void') list = list.filter(C.isActive); else list = list.filter(t => t.status === 'void');
   if (f === 'P' || f === 'S') list = list.filter(t => t.type === f);
   if (f === 'open') list = list.filter(t => C.txState(idx, t).rem > 0.009);
@@ -761,7 +770,7 @@ function agingHtml(side) {
     '<div class="agleg">' + b.map((x, i) => '<div>' + names[i] + '<b class="num">' + fmt(x) + '</b></div>').join('') + '</div>';
 }
 function viewDues() {
-  const td = today(), pos = C.position(S.db, td), sd = S.due.side, side = sd === 'ar' ? pos.ar : pos.ap;
+  const td = today(), pos = C.position(VDB(), td), sd = S.due.side, side = sd === 'ar' ? pos.ar : pos.ap;
   const lbl = sd === 'ar' ? ['لنا عند العملاء', 'عميل'] : ['علينا للموردين', 'مورد'];
   let html = '<div class="page-title"><h2>المستحقات</h2></div>' +
     '<div class="seg" style="margin-bottom:12px"><button class="' + (sd === 'ar' ? 'on' : '') + '" data-act="side" data-side="ar">لنا (العملاء)</button><button class="' + (sd === 'ap' ? 'on' : '') + '" data-act="side" data-side="ap">علينا (الموردون)</button></div>' +
@@ -834,7 +843,7 @@ function viewReports() {
     [['summary', 'ملخص الفترة'], ['stock', 'المخزون'], ['stmt', 'كشف حساب']].map(x => '<button class="' + (sub === x[0] ? 'on' : '') + '" data-act="rsub" data-s="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
   if (sub === 'stock') return html + viewStock();
   if (sub === 'stmt') return html + viewStatement();
-  const r = curRange(), R = C.summarize(S.db, r.start, r.end, { byColor: S.rep.byColor }), ser = C.series(S.db, r);
+  const r = curRange(), R = C.summarize(VDB(), r.start, r.end, { byColor: S.rep.byColor }), ser = C.series(VDB(), r);
   html += periodNav(r);
   html += '<div class="print-only"><h2>تقرير الفوم — ' + esc(r.label) + '</h2></div>';
   html += '<div class="grid2" style="margin-bottom:12px">' +
@@ -866,7 +875,7 @@ function viewReports() {
   return html;
 }
 function viewStock() {
-  const td = today(), inv = C.runInventory(S.db, td).sku.filter(s => s.inQty > 0 || s.outQty > 0).sort((a, b) => b.value - a.value);
+  const td = today(), inv = C.runInventory(VDB(), td).sku.filter(s => s.inQty > 0 || s.outQty > 0).sort((a, b) => b.value - a.value);
   const tv = inv.reduce((a, s) => a + s.value, 0);
   let html = '<div class="card"><div class="kpi pri"><div class="l">قيمة المخزون الحالي بالتكلفة</div><div class="v">' + M(tv) + '</div><div class="s">' + inv.filter(s => s.qty > 0.00001).length + ' صنف برصيد</div></div></div>';
   if (!inv.length) return html + '<div class="empty"><div class="big">📦</div>لا توجد حركات مخزون.</div>';
@@ -877,13 +886,13 @@ function viewStock() {
   return html + '<div class="hint">الرصيد = المشترى − المباع لنفس (الصنف + اللون + السمك/القطر/الوجه + الوحدة). التكلفة بالمتوسط المرجح شاملة الشحن.</div>';
 }
 function viewStatement() {
-  const idx = C.buildIndex(S.db);
+  const idx = C.buildIndex(VDB());
   const parts = { S: new Map(), P: new Map() };
-  S.db.txns.filter(C.isActive).forEach(t => { const k = C.nameKey(t.party); if (!parts[t.type].has(k)) parts[t.type].set(k, C.normName(t.party)); });
+  VDB().txns.filter(C.isActive).forEach(t => { const k = C.nameKey(t.party); if (!parts[t.type].has(k)) parts[t.type].set(k, C.normName(t.party)); });
   const opt = (type, lab) => '<optgroup label="' + lab + '">' + [...parts[type].entries()].sort((a, b) => a[1].localeCompare(b[1], 'ar')).map(([k, n]) => '<option value="' + type + '|' + esc(k) + '"' + (S.rep.stParty === type + '|' + k ? ' selected' : '') + '>' + esc(n) + '</option>').join('') + '</optgroup>';
   let html = '<div class="fld"><label>اختر العميل أو المورد</label><select data-f="stparty"><option value="">— اختر —</option>' + opt('S', 'العملاء') + opt('P', 'الموردون') + '</select></div>';
   if (!S.rep.stParty) return html + '<div class="empty">اختر طرفًا لعرض كشف حسابه.</div>';
-  const [type, key] = S.rep.stParty.split('|'), st = C.statement(S.db, type, key), name = parts[type].get(key) || '';
+  const [type, key] = S.rep.stParty.split('|'), st = C.statement(VDB(), type, key), name = parts[type].get(key) || '';
   html += '<div class="card"><h3>' + (type === 'S' ? 'كشف حساب عميل' : 'كشف حساب مورد') + ' — ' + esc(name) + '</h3>';
   html += '<div class="stmt-row b muted xs"><span>التاريخ</span><span>البيان</span><span>' + (type === 'S' ? 'علينا له' : 'مشتريات') + '</span><span>الرصيد</span></div>';
   html += st.rows.map(r => '<div class="stmt-row"><span class="xs">' + C.shortDate(r.date) + '</span><span>' + (r.kind === 'inv' ? esc(r.t.item) + (r.t.color ? ' · ' + esc(r.t.color) : '') : '<span class="pos b">' + (type === 'S' ? 'تحصيل' : 'سداد') + '</span> ' + esc(r.p.method || '')) + '</span><span class="num ' + (r.kind === 'pay' ? 'pos' : '') + '">' + (r.debit ? fmt(r.debit) : '−' + fmt(r.credit)) + '</span><b class="num">' + fmt(r.bal) + '</b></div>').join('');
@@ -901,7 +910,7 @@ function render() {
   const caret = document.activeElement && document.activeElement.selectionStart;
   m.innerHTML = (views[S.tab] || viewHome)();
   $$('nav.bar button[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
-  const pos = C.position(S.db, today()), od = pos.ar.overdue > 0 || pos.ap.overdue > 0;
+  const pos = C.position(VDB(), today()), od = pos.ar.overdue > 0 || pos.ap.overdue > 0;
   const pill = $('#pill'); if (pill) pill.classList.toggle('hide', !od);
   const sy = $('#sync'); if (sy) sy.innerHTML = syncHtml();
   if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) {} } }
@@ -922,12 +931,12 @@ function closeSheet() { const d = $('#scrim'); if (d) d.remove(); document.body.
 /* ---------- item catalogue ---------- */
 function allItems() {
   const m = new Map(C.ITEMS.map(i => [i.name, i.grp]));
-  S.db.txns.forEach(t => { if (t.item && !m.has(t.item)) m.set(t.item, t.grp || 'sheet'); });
+  VDB().txns.forEach(t => { if (t.item && !m.has(t.item)) m.set(t.item, t.grp || 'sheet'); });
   return [...m.entries()].map(([name, grp]) => ({ name, grp }));
 }
 function partyNames(type) {
   const m = new Map();
-  S.db.txns.filter(t => t.type === type).sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || ''))).forEach(t => { const k = C.nameKey(t.party); if (!m.has(k)) m.set(k, { name: C.normName(t.party), phone: t.phone || '' }); else if (!m.get(k).phone && t.phone) m.get(k).phone = t.phone; });
+  VDB().txns.filter(t => t.type === type).sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || ''))).forEach(t => { const k = C.nameKey(t.party); if (!m.has(k)) m.set(k, { name: C.normName(t.party), phone: t.phone || '' }); else if (!m.get(k).phone && t.phone) m.get(k).phone = t.phone; });
   return [...m.values()];
 }
 
@@ -1029,7 +1038,7 @@ function recalc(initial) {
   // last-price hint
   const lp = $('#lastPrice');
   if (lp && F.item && F.unit) {
-    const last = S.db.txns.filter(x => C.isActive(x) && x.type === F.type && x.item === F.item && x.unit === F.unit && x.id !== F.id && (!F.color || x.color === F.color) && num(x.price) > 0)
+    const last = VDB().txns.filter(x => C.isActive(x) && x.type === F.type && x.item === F.item && x.unit === F.unit && x.id !== F.id && (!F.color || x.color === F.color) && num(x.price) > 0)
       .sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || '')))[0];
     lp.innerHTML = last ? 'آخر سعر ' + (F.type === 'P' ? 'شراء' : 'بيع') + ' لنفس الصنف: <b>' + fmt(last.price) + '</b> للـ' + C.UNITS[F.unit].label + ' (' + C.shortDate(last.date) + ') <button type="button" data-act="useLast" data-p="' + last.price + '">استخدمه</button>' : '';
   }
@@ -1073,7 +1082,7 @@ function saveForm() {
 /* ---------- detail & payments ---------- */
 function openDetail(id) {
   const t = getTx(id); if (!t) return;
-  const idx = C.buildIndex(S.db), st = C.txState(idx, t), P = t.type === 'P', void_ = t.status === 'void';
+  const idx = C.buildIndex(VDB()), st = C.txState(idx, t), P = t.type === 'P', void_ = t.status === 'void';
   const pays = (idx.pays.get(id) || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
   const kv = (k, v) => v === '' || v === undefined ? '' : '<div class="kv"><span class="k">' + k + '</span><b style="text-align:left">' + v + '</b></div>';
   const body = '<div class="card">' +
@@ -1087,14 +1096,14 @@ function openDetail(id) {
     (st.rem > 0.009 ? kv('الاستحقاق', C.longDate(st.due) + ' · ' + dueText(st)) : '') + kv('ملاحظات', esc(t.note)) +
     '<div class="muted xs" style="margin-top:8px">سجّله ' + esc(t.by || '—') + ' · ' + esc(String(t.at || '').replace('T', ' ')) + (t.upd ? ' · عُدّل ' + esc(t.upd) : '') + '</div></div>' +
     '<div class="card"><h3>' + (P ? 'الدفعات' : 'التحصيلات') + ' (' + pays.filter(C.isActive).length + ')</h3>' +
-    (pays.length ? pays.map(p => '<div class="kv" style="' + (p.status === 'void' ? 'opacity:.5;text-decoration:line-through' : '') + '"><span>' + C.longDate(p.date) + ' · ' + esc(p.method || '') + '<div class="xs muted">' + esc(p.by || '') + '</div></span><span><b>' + M(p.amt) + '</b> ' + (isAdmin() && p.status !== 'void' && !void_ ? '<button class="btn bad sm" style="min-height:30px;padding:2px 10px" data-act="voidPay" data-id="' + esc(p.id) + '">إلغاء</button>' : '') + '</span></div>').join('') : '<div class="muted sm">لا توجد دفعات.</div>') + '</div>';
+    (pays.length ? pays.map(p => '<div class="kv" style="' + (p.status === 'void' ? 'opacity:.5;text-decoration:line-through' : '') + '"><span>' + C.longDate(p.date) + ' · ' + esc(p.method || '') + '<div class="xs muted">' + esc(p.by || '') + '</div></span><span><b>' + M(p.amt) + '</b> ' + (canManage() && p.status !== 'void' && !void_ ? '<button class="btn bad sm" style="min-height:30px;padding:2px 10px" data-act="voidPay" data-id="' + esc(p.id) + '">إلغاء</button>' : '') + '</span></div>').join('') : '<div class="muted sm">لا توجد دفعات.</div>') + '</div>';
   const foot = void_ ? '' : (st.rem > 0.009 && canWrite() ? '<button class="btn ' + (P ? 'pur' : 'sal') + '" data-act="pay" data-id="' + esc(id) + '">' + (P ? 'تسجيل سداد' : 'تسجيل تحصيل') + '</button>' : '') +
     (canWrite() ? '<button class="btn ghost" data-act="copy" data-id="' + esc(id) + '" style="flex:0 0 auto">نسخ</button>' : '') +
-    (isAdmin() ? '<button class="btn ghost" data-act="edit" data-id="' + esc(id) + '" style="flex:0 0 auto">تعديل</button><button class="btn bad" data-act="voidTx" data-id="' + esc(id) + '" style="flex:0 0 auto">إلغاء</button>' : '');
+    (canManage() ? '<button class="btn ghost" data-act="edit" data-id="' + esc(id) + '" style="flex:0 0 auto">تعديل</button><button class="btn bad" data-act="voidTx" data-id="' + esc(id) + '" style="flex:0 0 auto">إلغاء</button>' : '');
   openSheet('<span class="tag ' + t.type + '">' + (P ? 'شراء' : 'بيع') + '</span> ' + esc(t.party), body, foot);
 }
 function openPay(id) {
-  const t = getTx(id); if (!t) return; const idx = C.buildIndex(S.db), st = C.txState(idx, t), P = t.type === 'P';
+  const t = getTx(id); if (!t) return; const idx = C.buildIndex(VDB()), st = C.txState(idx, t), P = t.type === 'P';
   window._pay = { id, method: 'كاش' };
   openSheet((P ? 'تسجيل سداد — ' : 'تسجيل تحصيل — ') + esc(t.party),
     '<div class="card"><div class="kv"><span class="k">إجمالي الفاتورة</span><b>' + M(st.total) + '</b></div><div class="kv"><span class="k">المتبقي</span><b class="neg">' + M(st.rem) + '</b></div></div>' +
@@ -1104,7 +1113,7 @@ function openPay(id) {
     '<button class="btn ' + (P ? 'pur' : 'sal') + '" data-act="savePay">💾 حفظ</button><button class="btn ghost" data-act="close" style="flex:0 0 90px">إلغاء</button>');
 }
 function savePayForm() {
-  const p = window._pay, t = getTx(p.id), idx = C.buildIndex(S.db), st = C.txState(idx, t);
+  const p = window._pay, t = getTx(p.id), idx = C.buildIndex(VDB()), st = C.txState(idx, t);
   const amt = C.r2(C.parseNum($('#payAmt').value)), date = $('#payDate').value;
   if (!(amt > 0)) return toast('اكتب مبلغًا صحيحًا', true);
   if (!date) return toast('حدد التاريخ', true);
@@ -1122,9 +1131,9 @@ function remindText(p) {
 }
 function csvEscape(v) { v = String(v === undefined || v === null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
 function exportCsv() {
-  const idx = C.buildIndex(S.db);
+  const idx = C.buildIndex(VDB());
   const head = ['التاريخ', 'النوع', 'الطرف', 'الهاتف', 'الصنف', 'اللون', 'المواصفات', 'الوحدة', 'الكمية', 'سعر الوحدة', 'ثمن البضاعة', 'خصم', 'شحن', 'نمط الشحن', 'إجمالي الفاتورة', 'المدفوع', 'المتبقي', 'الاستحقاق', 'الحالة', 'ملاحظات', 'سجّله'];
-  const rows = S.db.txns.slice().sort((a, b) => a.date < b.date ? -1 : 1).map(t => { const s = C.txState(idx, t); return [t.date, t.type === 'P' ? 'شراء' : 'بيع', t.party, t.phone, t.item, t.color, C.describeSpec(t), C.UNITS[t.unit] ? C.UNITS[t.unit].label : t.unit, t.qty, t.price, t.goods, t.disc, t.ship, t.shipMode === 'billed' ? 'على الفاتورة' : 'منفصل', s.total, s.paid, s.rem, t.due, t.status === 'void' ? 'ملغى' : STATE_LBL[s.st], t.note, t.by]; });
+  const rows = VDB().txns.slice().sort((a, b) => a.date < b.date ? -1 : 1).map(t => { const s = C.txState(idx, t); return [t.date, t.type === 'P' ? 'شراء' : 'بيع', t.party, t.phone, t.item, t.color, C.describeSpec(t), C.UNITS[t.unit] ? C.UNITS[t.unit].label : t.unit, t.qty, t.price, t.goods, t.disc, t.ship, t.shipMode === 'billed' ? 'على الفاتورة' : 'منفصل', s.total, s.paid, s.rem, t.due, t.status === 'void' ? 'ملغى' : STATE_LBL[s.st], t.note, t.by]; });
   const csv = '﻿' + [head, ...rows].map(r => r.map(csvEscape).join(',')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'foam-transactions-' + today() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
 }
@@ -1136,9 +1145,14 @@ function openSettings() {
     '<div class="card"><h3>🔗 الملف المشترك (Google Sheet)</h3><div class="fld"><label>رابط تطبيق الويب (Apps Script)</label><input type="url" id="setUrl" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(S.set.url) + '"></div>' +
     '<div class="fld"><label>الرقم السري</label><input type="password" id="setPin" dir="ltr" autocomplete="off" value="' + esc(S.set.pin) + '"></div>' +
     '<button class="btn block" data-act="connect">اتصال وحفظ</button>' +
-    (r && S.set.user ? '<div class="hint">المتصل: <b>' + esc(S.set.user) + '</b> · الصلاحية: ' + ({ admin: 'مدير', entry: 'إدخال', view: 'عرض' }[S.set.role] || '') + (S.out.length ? ' · ' + S.out.length + ' عملية بانتظار المزامنة' : '') + '</div>' : '') +
+    (r && S.set.user ? '<div class="hint">المتصل: <b>' + esc(S.set.user) + '</b> · الصلاحية: ' + ({ admin: 'مدير (يرى الكل)', own: 'مستقل (يرى حركاته فقط)', entry: 'إدخال', view: 'عرض' }[S.set.role] || '') + (S.out.length ? ' · ' + S.out.length + ' عملية بانتظار المزامنة' : '') + '</div>' : '') +
     (!r ? '<div class="hint">بدون رابط يعمل التطبيق <b>محليًا</b> على هذا الجهاز فقط (غير مشترك).</div>' : '') + '</div>' +
+    (r && S.set.role === 'admin' ? viewAsCard() : '') +
     '<div class="card"><h3>🧰 أدوات</h3><div class="row wrap"><button class="btn ghost sm" data-act="csv">⬇ تصدير الحركات Excel</button>' + (r ? '<button class="btn ghost sm" data-act="syncNow">🔄 مزامنة الآن</button><button class="btn bad sm" data-act="logout">تسجيل خروج</button>' : '<button class="btn ghost sm" data-act="seed">🧪 بيانات تجريبية</button><button class="btn bad sm" data-act="wipe">مسح بيانات الجهاز</button>') + '</div></div>', '');
+}
+function viewAsCard() {
+  const names = [...new Set(S.db.txns.map(t => t.by).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
+  return '<div class="card"><h3>👥 عرض بيانات</h3><div class="fld"><label>اعرض حركات مَن؟ (للمدير فقط)</label><select id="viewAs"><option value="">الكل</option>' + names.map(n => '<option' + (S.set.viewAs === n ? ' selected' : '') + '>' + esc(n) + '</option>').join('') + '</select></div><div class="hint">كل مستخدم يسجّل باسمه، والمستقلون لا يرون إلا حركاتهم. هذا الفلتر يخص شاشتك أنت فقط.</div></div>';
 }
 async function connect() {
   const url = $('#setUrl').value.trim(), pin = $('#setPin').value.trim();
@@ -1150,10 +1164,10 @@ async function connect() {
     const r = await api('login');
     if (!r.ok) { S.set = prev; setStatus(prev.url ? 'ok' : 'loc'); return toast(r.error || 'فشل الاتصال', true); }
     S.set.user = r.user; S.set.role = r.role;
-    const hadLocal = !prev.url && S.db.txns.length > 0;
+    const hadLocal = !prev.url && VDB().txns.length > 0;
     if (hadLocal) {
-      if (confirm('يوجد ' + S.db.txns.length + ' حركة مسجلة محليًا على هذا الجهاز. هل ترفعها إلى الملف المشترك؟\n(إن كانت بيانات تجريبية اختر إلغاء ثم امسحها من الإعدادات)')) {
-        S.out = S.db.txns.map(t => ({ op: 'saveTx', tx: t, pays: S.db.pays.filter(p => p.tx === t.id) }));
+      if (confirm('يوجد ' + VDB().txns.length + ' حركة مسجلة محليًا على هذا الجهاز. هل ترفعها إلى الملف المشترك؟\n(إن كانت بيانات تجريبية اختر إلغاء ثم امسحها من الإعدادات)')) {
+        S.out = VDB().txns.map(t => ({ op: 'saveTx', tx: t, pays: VDB().pays.filter(p => p.tx === t.id) }));
       } else { S.db = { txns: [], pays: [] }; }
     } else { S.db = { txns: [], pays: [] }; }
     persist(); closeSheet(); toast('تم الاتصال ✓ ' + r.user);
@@ -1206,17 +1220,17 @@ document.addEventListener('click', ev => {
     case 'pay': openPay(d.id); break;
     case 'payMethod': window._pay.method = d.m; $$('#payMethods .chip').forEach(c => c.classList.toggle('on', c.dataset.m === d.m)); break;
     case 'savePay': savePayForm(); break;
-    case 'remind': { const side = C.position(S.db, today()).ar; const p = side.parties.get(d.party); if (p) openWA(remindText(p), waNumber(p.phone)); break; }
+    case 'remind': { const side = C.position(VDB(), today()).ar; const p = side.parties.get(d.party); if (p) openWA(remindText(p), waNumber(p.phone)); break; }
     case 'stmt': S.rep.sub = 'stmt'; S.rep.stParty = d.type + '|' + d.party; S.tab = 'reports'; closeSheet(); render(); window.scrollTo(0, 0); break;
     case 'shareStmt': {
-      const [type, key] = S.rep.stParty.split('|'), st = C.statement(S.db, type, key), nm = (S.db.txns.find(t => t.type === type && C.nameKey(t.party) === key) || {}).party || '';
+      const [type, key] = S.rep.stParty.split('|'), st = C.statement(VDB(), type, key), nm = (VDB().txns.find(t => t.type === type && C.nameKey(t.party) === key) || {}).party || '';
       const L = ['كشف حساب — ' + nm, ''];
       st.rows.forEach(r => L.push(C.shortDate(r.date) + '  ' + (r.kind === 'inv' ? r.t.item + ' : ' + fmt(r.debit) : 'دفعة ' + (r.p.method || '') + ' : −' + fmt(r.credit)) + '  | الرصيد ' + fmt(r.bal)));
       L.push('', 'الرصيد المستحق: ' + fmt(st.balance) + ' ' + C.CURRENCY); openWA(L.join('\n')); break; }
     case 'edit': { const t = getTx(d.id); closeSheet(); openForm(t.type, t); break; }
     case 'copy': { const t = getTx(d.id); closeSheet(); openForm(t.type, t, true); break; }
     case 'voidTx': if (confirm('إلغاء هذه الحركة؟ ستبقى في السجل كملغاة ولن تُحتسب في التقارير.')) { closeSheet(); commit([{ op: 'voidTx', id: d.id }]); toast('تم الإلغاء'); } break;
-    case 'voidPay': if (confirm('إلغاء هذه الدفعة؟')) { const p = S.db.pays.find(x => x.id === d.id); closeSheet(); commit([{ op: 'voidPay', id: d.id }]); toast('تم إلغاء الدفعة'); if (p) openDetail(p.tx); } break;
+    case 'voidPay': if (confirm('إلغاء هذه الدفعة؟')) { const p = VDB().pays.find(x => x.id === d.id); closeSheet(); commit([{ op: 'voidPay', id: d.id }]); toast('تم إلغاء الدفعة'); if (p) openDetail(p.tx); } break;
     case 'settings': openSettings(); break;
     case 'connect': connect(); break;
     case 'syncNow': flush().then(() => toast('تمت المزامنة')); break;
@@ -1237,6 +1251,7 @@ document.addEventListener('click', ev => {
 });
 function onField(ev, isChange) {
   const el = ev.target;
+  if (el.id === 'viewAs') { S.set.viewAs = el.value; persist(); render(); return; }
   if (el.dataset.ff && F) {
     const k = el.dataset.ff, v = el.value;
     if (k === 'item') { if (v === '__new') { $('#newitem').classList.remove('hide'); el.value = F.item || ''; return; } if (isChange) setItem(v); return; }
