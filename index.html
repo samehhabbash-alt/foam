@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E6E6E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>سجل الفوم — مشتريات ومبيعات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F3EE; --card:#FFFFFF; --ink:#1E2B2F; --muted:#66767C; --line:#E4DFD4; --soft:#EFEBE2;
+  --pri:#0E6E6E; --pri2:#0A5656; --priBg:#DDF0EE; --onpri:#fff;
+  --pur:#B94B31; --purBg:#FBE9E3; --sal:#27774A; --salBg:#E1F3E8;
+  --warn:#A9690B; --warnBg:#FDF0D5; --bad:#B8322A; --badBg:#FBE3E0; --ok:#27774A;
+  --shadow:0 1px 2px rgba(30,43,47,.06),0 4px 14px rgba(30,43,47,.07);
+  --r:16px; --fs:17px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=light]){
+    --bg:#101719; --card:#182326; --ink:#E7EEEF; --muted:#93A5AB; --line:#2A3A3E; --soft:#1F2D31;
+    --pri:#3FB6AB; --pri2:#2E9A90; --priBg:#17393A; --onpri:#06201f; --pur:#F08A6E; --purBg:#3A2119; --sal:#5CC688; --salBg:#17321F;
+    --warn:#E8B04E; --warnBg:#3A2D12; --bad:#F08178; --badBg:#3B1B18; --ok:#5CC688; --shadow:none;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:var(--fs)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;font-weight:500;line-height:1.55;direction:rtl;text-align:right;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:800}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.muted{color:var(--muted)} .b{font-weight:800} .sb{font-weight:700} .c{text-align:center} .sm{font-size:.82rem} .xs{font-size:.74rem}
+.hide{display:none!important}
+
+/* header */
+header.top{position:sticky;top:0;z-index:20;background:var(--pri);color:var(--onpri);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
+header.top h1{font-size:1.2rem;flex:1}
+header.top .sync{font-size:.74rem;font-weight:700;opacity:.92;display:flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;background:#9be7a8;display:inline-block}
+.dot.off{background:#ffb4a8}.dot.wait{background:#ffe08a}.dot.loc{background:#d6d6d6}
+.iconbtn{background:rgba(255,255,255,.16);border:0;color:inherit;border-radius:12px;width:42px;height:42px;font-size:1.2rem;cursor:pointer}
+main{padding:14px 14px 20px;max-width:760px;margin:0 auto}
+.page-title{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 12px}
+.page-title h2{font-size:1.25rem}
+
+/* cards */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;margin-bottom:12px;border:1px solid var(--line)}
+.card>h3{font-size:1.02rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{border-radius:14px;padding:12px;background:var(--soft);min-height:84px}
+.kpi .l{font-size:.8rem;color:var(--muted);font-weight:700}
+.kpi .v{font-size:1.28rem;font-weight:800;line-height:1.25;margin-top:2px;word-break:break-word}
+.kpi .s{font-size:.76rem;color:var(--muted);margin-top:2px}
+.kpi.pur{background:var(--purBg)}.kpi.pur .v{color:var(--pur)}
+.kpi.sal{background:var(--salBg)}.kpi.sal .v{color:var(--sal)}
+.kpi.pri{background:var(--priBg)}.kpi.pri .v{color:var(--pri)}
+.kpi.warn{background:var(--warnBg)}.kpi.warn .v{color:var(--warn)}
+.kpi.bad{background:var(--badBg)}.kpi.bad .v{color:var(--bad)}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);align-items:baseline}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted);font-weight:600}
+.kv.tot{font-weight:800;border-top:2px solid var(--line);border-bottom:0;margin-top:4px;padding-top:10px}
+.kv.sub .k{padding-inline-start:12px;font-size:.92rem}
+
+/* buttons / chips */
+.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:800;cursor:pointer;background:var(--pri);color:var(--onpri);min-height:48px}
+.btn.pur{background:var(--pur);color:#fff}.btn.sal{background:var(--sal);color:#fff}
+.btn.ghost{background:var(--soft);color:var(--ink)} .btn.line{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.bad{background:var(--badBg);color:var(--bad)}
+.btn.sm{min-height:38px;padding:7px 12px;font-size:.88rem;border-radius:11px}
+.btn.block{display:block;width:100%}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:10px;align-items:center}.row.wrap{flex-wrap:wrap}.row>.grow{flex:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:.92rem;white-space:nowrap}
+.chip.on{background:var(--pri);border-color:var(--pri);color:var(--onpri)}
+.chip.pur.on{background:var(--pur);border-color:var(--pur);color:#fff}.chip.sal.on{background:var(--sal);border-color:var(--sal);color:#fff}
+.seg{display:flex;background:var(--soft);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;border-radius:11px;padding:10px 6px;font-weight:800;cursor:pointer;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.seg.pur button.on{background:var(--pur);color:#fff}.seg.sal button.on{background:var(--sal);color:#fff}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+.b-paid{background:var(--salBg);color:var(--ok)}.b-open{background:var(--soft);color:var(--muted)}.b-partial{background:var(--warnBg);color:var(--warn)}.b-overdue{background:var(--badBg);color:var(--bad)}.b-void{background:var(--soft);color:var(--muted);text-decoration:line-through}.b-over{background:var(--warnBg);color:var(--warn)}
+.tag{display:inline-block;border-radius:8px;padding:1px 8px;font-size:.74rem;font-weight:800}
+.tag.P{background:var(--purBg);color:var(--pur)}.tag.S{background:var(--salBg);color:var(--sal)}
+.swatch{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.25);vertical-align:-2px;margin-inline-end:5px}
+
+/* list items */
+.item{display:block;width:100%;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px;cursor:pointer;box-shadow:var(--shadow)}
+.item .t1{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:800}
+.item .t2{color:var(--muted);font-size:.86rem;margin-top:2px}
+.item .t3{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px}
+.item.void{opacity:.55}
+.dayhdr{font-weight:800;color:var(--muted);font-size:.85rem;margin:14px 4px 6px}
+.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.empty .big{font-size:2.2rem}
+
+/* inputs */
+.fld{margin-bottom:12px}
+.fld>label,.lbl{display:block;font-weight:700;font-size:.88rem;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=search],input[type=tel],input[type=date],input[type=password],input[type=url],select,textarea,input[inputmode=decimal]{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:11px 12px;min-height:50px;font-weight:600;font-size:1rem;appearance:none;-webkit-appearance:none}
+input[type=date]{text-align:right}
+select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%2366767C' stroke-width='2'/></svg>");background-repeat:no-repeat;background-position:left 12px center;padding-inline-end:12px;padding-inline-start:34px}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pri)}
+input.num-in{direction:ltr;text-align:right}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.colors{display:flex;flex-wrap:wrap;gap:8px}
+.col{display:flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px 6px 10px;font-weight:700;cursor:pointer;font-size:.9rem}
+.col i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.28);display:inline-block}
+.col.on{border-color:var(--pri);background:var(--priBg)}
+.calc{background:var(--priBg);border-radius:14px;padding:10px 14px;margin:6px 0 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.calc .v{font-weight:800;font-size:1.08rem;color:var(--pri)}
+.totalbox{background:var(--ink);color:var(--bg);border-radius:16px;padding:12px 16px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
+.totalbox .v{font-size:1.5rem;font-weight:800}
+.hint{font-size:.8rem;color:var(--muted);margin-top:4px}
+.hint button{border:0;background:none;color:var(--pri);font-weight:800;padding:0;cursor:pointer;text-decoration:underline}
+.sect{font-weight:800;color:var(--pri);margin:18px 2px 8px;font-size:.95rem;border-bottom:2px solid var(--priBg);padding-bottom:4px}
+
+/* bottom nav */
+nav.bar{position:fixed;bottom:0;inset-inline:0;z-index:30;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+nav.bar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:1px;font-weight:700;font-size:.72rem;color:var(--muted);padding:4px 0;cursor:pointer;position:relative}
+nav.bar button .ic{font-size:1.35rem;line-height:1.2}
+nav.bar button.on{color:var(--pri)}
+nav.bar button.on::before{content:'';position:absolute;top:-7px;width:34px;height:4px;border-radius:0 0 4px 4px;background:var(--pri)}
+nav.bar .fab{transform:translateY(-16px)}
+nav.bar .fab span.circ{width:56px;height:56px;border-radius:50%;background:var(--pri);color:var(--onpri);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 6px 16px rgba(14,110,110,.4);margin-bottom:-14px}
+.pill{position:absolute;top:0;inset-inline-end:22%;background:var(--bad);color:#fff;border-radius:999px;font-size:.66rem;padding:0 6px;min-width:18px;line-height:18px;font-weight:800}
+
+/* sheet modal */
+.scrim{position:fixed;inset:0;background:rgba(10,20,22,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:760px;max-height:94vh;max-height:94dvh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.sheet header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sheet header h2{flex:1;font-size:1.1rem}
+.sheet .body{overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch}
+.sheet footer{padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:10px;background:var(--bg)}
+.sheet footer .btn{flex:1}
+.x{background:var(--soft);border:0;border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer}
+.toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));inset-inline:16px;margin:auto;max-width:520px;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;z-index:90;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center}
+.toast.err{background:var(--bad);color:#fff}
+
+/* charts, bars */
+.bars{display:flex;align-items:flex-end;gap:3px;height:150px;padding-top:6px}
+.bars .col2{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.bars .pair{display:flex;align-items:flex-end;gap:1px;height:calc(100% - 20px);width:100%;justify-content:center}
+.bars .bar{flex:1;max-width:14px;border-radius:4px 4px 0 0;min-height:2px}
+.bars .bar.p{background:var(--pur)}.bars .bar.s{background:var(--sal)}
+.bars .lab{font-size:.62rem;color:var(--muted);height:20px;line-height:20px;overflow:hidden;white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:.8rem;margin-top:6px;color:var(--muted);font-weight:700}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:5px}
+.aging{display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--soft);margin:8px 0}
+.aging span{display:block;height:100%}
+.ag0{background:#6BB88D}.ag1{background:#E8C45A}.ag2{background:#E39A4B}.ag3{background:#D9694F}.ag4{background:#A92E2E}
+.agleg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center;font-size:.68rem;color:var(--muted);font-weight:700}
+.agleg b{display:block;color:var(--ink);font-size:.78rem}
+.period{display:flex;align-items:center;gap:8px;margin:6px 0 12px}
+.period .lab{flex:1;text-align:center;font-weight:800;font-size:.98rem;line-height:1.3}
+.period button{width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-size:1.2rem;cursor:pointer;font-weight:800}
+details.party{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:9px;box-shadow:var(--shadow)}
+details.party>summary{list-style:none;padding:12px;cursor:pointer;display:block}
+details.party>summary::-webkit-details-marker{display:none}
+details.party .inner{padding:0 12px 12px}
+.inv{border-top:1px dashed var(--line);padding:9px 0;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.warnbox{background:var(--warnBg);color:var(--warn);border-radius:12px;padding:10px 12px;font-weight:700;font-size:.88rem;margin-bottom:10px}
+.stmt-row{display:grid;grid-template-columns:62px 1fr auto auto;gap:6px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.86rem;align-items:center}
+.print-only{display:none}
+@media print{
+  header.top,nav.bar,.noprint,.toast{display:none!important}
+  body{background:#fff;color:#000;padding:0}.card{box-shadow:none;break-inside:avoid}.print-only{display:block}
+}
+
+</style>
+</head>
+<body><div style="padding:40px;text-align:center">جارٍ التحميل…</div>
+<script>
+/* ===== CORE: pure business logic (no DOM) ===== */
+(function (root) {
+'use strict';
+
+const CURRENCY = 'ج.م';
+const ITEMS = [
+  { name: 'فوم بولي إيثيلين - ألواح', grp: 'sheet' },
+  { name: 'فوم بولي إيثيلين - رولات', grp: 'roll' },
+  { name: 'مواسير فوم بولي إيثيلين - مفرغة', grp: 'pipeH' },
+  { name: 'مواسير فوم بولي إيثيلين - مصمتة', grp: 'pipeS' },
+  { name: 'زوايا فوم بولي إيثيلين', grp: 'corner' },
+  { name: 'ألواح الفوم الأبيض', grp: 'sheet' },
+  { name: 'ألواح الفوم الأزرق الصلب', grp: 'sheet' },
+  { name: 'ألواح فوم إيفا (EVA)', grp: 'eva' },
+];
+const GROUPS = {
+  sheet:  { label: 'ألواح',        fields: ['thick', 'width', 'length', 'count', 'tot'], units: ['m3', 'm2', 'pc'], def: 'm3' },
+  roll:   { label: 'رولات',        fields: ['thick', 'width', 'length', 'count'],        units: ['roll', 'm2', 'lm'], def: 'roll' },
+  pipeH:  { label: 'ماسورة مفرغة', fields: ['dIn', 'dOut', 'length', 'count', 'tot'],    units: ['lm', 'pc'], def: 'lm' },
+  pipeS:  { label: 'ماسورة مصمتة', fields: ['dOut', 'length', 'count', 'tot'],           units: ['lm', 'pc'], def: 'lm' },
+  corner: { label: 'زوايا',        fields: ['arm1', 'arm2', 'length', 'count', 'tot'],   units: ['lm', 'pc'], def: 'lm' },
+  eva:    { label: 'إيفا',         fields: ['thick', 'width', 'length', 'count', 'tot', 'face'], units: ['m2', 'pc'], def: 'm2' },
+};
+const UNITS = {
+  m3:   { label: 'متر مكعب',   short: 'م³' },
+  m2:   { label: 'متر مربع',   short: 'م²' },
+  lm:   { label: 'متر طولي',   short: 'م.ط' },
+  roll: { label: 'رول',        short: 'رول' },
+  pc:   { label: 'عود / قطعة', short: 'قطعة' },
+};
+const FIELD_LABELS = {
+  thick: 'السمك (مم)', width: 'العرض (م)', length: 'الطول (م)', count: 'العدد',
+  tot: 'إجمالي الأمتار (اختياري)', dIn: 'القطر الداخلي (مم)', dOut: 'القطر الخارجي (مم)',
+  arm1: 'الذراع الأول (سم)', arm2: 'الذراع الثاني (سم)', face: 'الوجه',
+};
+const COUNT_LABEL = { sheet: 'عدد الأفرخ', roll: 'عدد الرولات', pipeH: 'عدد العيدان', pipeS: 'عدد العيدان', corner: 'عدد القطع', eva: 'عدد الأفرخ' };
+const FACES = ['وجه ناعم + وجه خشن', 'وجهان ناعمان', 'وجهان خشنان'];
+const COLORS = [
+  ['أبيض', '#F4F4F0'], ['أسود', '#222222'], ['رمادي', '#8A8F94'], ['أخضر', '#3E9B5F'],
+  ['فوشيا', '#D1197A'], ['بنفسجي', '#7A4FB5'], ['بينك', '#F29BBB'], ['أحمر', '#D2392F'],
+  ['برتقالي', '#EE8A2B'], ['أزرق', '#2F73C9'], ['أصفر', '#EBC62F'], ['بيج', '#D9C3A0'],
+];
+const METHODS = ['كاش', 'محفظة إلكترونية', 'إنستا باي', 'تحويل بنكي', 'شيك'];
+const TERMS = [0, 7, 15, 30, 45, 60, 90];
+const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+/* ---------- numbers & text ---------- */
+function parseNum(v) {
+  if (v === null || v === undefined || v === '') return NaN;
+  if (typeof v === 'number') return v;
+  let s = String(v).trim();
+  s = s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+       .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+       .replace(/[٫,]/g, '.').replace(/٬/g, '').replace(/\s+/g, '');
+  const n = parseFloat(s);
+  return isFinite(n) ? n : NaN;
+}
+const num = v => { const n = parseNum(v); return isNaN(n) ? 0 : n; };
+const r2 = x => Math.round((x + Number.EPSILON) * 100) / 100;
+const r4 = x => Math.round((x + Number.EPSILON) * 10000) / 10000;
+function fmt(n, d) {
+  n = +n || 0;
+  const dec = d === undefined ? (Math.abs(n - Math.round(n)) < 0.005 ? 0 : 2) : d;
+  return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+const fmtQty = n => fmt(r4(n), Math.abs(n - Math.round(n)) < 0.00005 ? 0 : (Math.abs(n * 10 - Math.round(n * 10)) < 0.0005 ? 1 : 2));
+const money = n => fmt(n) + ' ' + CURRENCY;
+const normName = s => String(s || '').replace(/\s+/g, ' ').trim();
+const nameKey = s => normName(s).replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').toLowerCase();
+
+/* ---------- dates (ISO strings, UTC arithmetic: no timezone surprises) ---------- */
+const p2 = n => (n < 10 ? '0' : '') + n;
+const parseD = s => { const a = String(s).slice(0, 10).split('-').map(Number); return Date.UTC(a[0], a[1] - 1, a[2]); };
+const fmtD = ms => { const d = new Date(ms); return d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1) + '-' + p2(d.getUTCDate()); };
+const addDays = (s, n) => fmtD(parseD(s) + n * 864e5);
+const diffDays = (a, b) => Math.round((parseD(a) - parseD(b)) / 864e5);
+const dow = s => new Date(parseD(s)).getUTCDay();
+function todayISO() { const d = new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
+function longDate(s) { const d = new Date(parseD(s)); return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+function shortDate(s) { const d = new Date(parseD(s)); return p2(d.getUTCDate()) + '/' + p2(d.getUTCMonth() + 1); }
+function daysInMonth(y, m) { return new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+
+/* ---------- quantity ---------- */
+function calcQty(t) {
+  const th = num(t.thick), w = num(t.width), l = num(t.length), c = num(t.count), tot = num(t.tot);
+  switch (t.unit) {
+    case 'm3': return (th > 0 && w > 0 && l > 0 && c > 0) ? r4(w * l * (th / 1000) * c) : 0;
+    case 'm2': return tot > 0 ? r4(tot) : ((w > 0 && l > 0 && c > 0) ? r4(w * l * c) : 0);
+    case 'lm': return tot > 0 ? r4(tot) : ((l > 0 && c > 0) ? r4(l * c) : 0);
+    case 'roll': case 'pc': return c > 0 ? r4(c) : 0;
+  }
+  return 0;
+}
+function describeSpec(t) {
+  const p = [];
+  const n = k => fmtQty(num(t[k]));
+  if (num(t.thick) > 0) p.push('سمك ' + n('thick') + ' مم');
+  if (num(t.dIn) > 0) p.push('قطر داخلي ' + n('dIn') + ' مم');
+  if (num(t.dOut) > 0) p.push('قطر خارجي ' + n('dOut') + ' مم');
+  if (num(t.arm1) > 0 || num(t.arm2) > 0) p.push('ذراع ' + n('arm1') + '×' + n('arm2') + ' سم');
+  if (num(t.width) > 0) p.push('عرض ' + n('width') + ' م');
+  if (num(t.length) > 0) p.push('طول ' + n('length') + ' م');
+  if (num(t.count) > 0) p.push(((COUNT_LABEL[t.grp] || 'العدد') + ' ' + n('count')));
+  if (num(t.tot) > 0) p.push('إجمالي ' + n('tot') + ' م');
+  if (t.face) p.push(t.face);
+  return p.join(' · ');
+}
+function skuKey(t) {
+  return [normName(t.item), t.color || '', t.unit, num(t.thick) || '', num(t.dIn) || '', num(t.dOut) || '',
+          num(t.arm1) || '', num(t.arm2) || '', t.face || ''].join('|');
+}
+function skuLabel(t) {
+  const bits = [t.item];
+  if (t.color) bits.push(t.color);
+  const sp = [];
+  if (num(t.thick) > 0) sp.push(fmtQty(num(t.thick)) + ' مم');
+  if (num(t.dIn) > 0) sp.push('داخلي ' + fmtQty(num(t.dIn)));
+  if (num(t.dOut) > 0) sp.push('خارجي ' + fmtQty(num(t.dOut)));
+  if (num(t.arm1) > 0 || num(t.arm2) > 0) sp.push(fmtQty(num(t.arm1)) + '×' + fmtQty(num(t.arm2)) + ' سم');
+  if (t.face) sp.push(t.face);
+  return bits.join(' - ') + (sp.length ? ' (' + sp.join('، ') + ')' : '');
+}
+
+/* ---------- accounting model ----------
+   tx: {id,type:'P'|'S',date,party,phone,item,grp,color,unit,thick,width,length,count,tot,dIn,dOut,arm1,arm2,face,
+        qty,price,goods,disc,ship,shipMode:'billed'|'direct',due,note,by,at,upd,status}
+   pay:{id,tx,date,amt,method,by,at,note,status}
+   total (invoice)  = goods - disc + (shipMode==='billed' ? ship : 0)
+   landed cost (P)  = goods - disc + ship
+   revenue (S)      = goods - disc ; ship borne by us (direct) = selling expense
+*/
+const isActive = x => x && x.status !== 'void';
+function netGoods(t) { return r2(num(t.goods) - num(t.disc)); }
+function invoiceTotal(t) { return r2(netGoods(t) + (t.shipMode === 'billed' ? num(t.ship) : 0)); }
+function directShip(t) { return t.shipMode === 'direct' ? r2(num(t.ship)) : 0; }
+
+function buildIndex(db) {
+  const tx = new Map(), pays = new Map();
+  (db.txns || []).forEach(t => { tx.set(t.id, t); });
+  (db.pays || []).forEach(p => { if (!pays.has(p.tx)) pays.set(p.tx, []); pays.get(p.tx).push(p); });
+  return { tx, pays };
+}
+function paidOf(idx, id, asOf) {
+  return r2((idx.pays.get(id) || []).reduce((a, p) => a + (isActive(p) && (!asOf || p.date <= asOf) ? num(p.amt) : 0), 0));
+}
+function txState(idx, t, asOf) {
+  const total = invoiceTotal(t), paid = paidOf(idx, t.id, asOf), rem = r2(total - paid);
+  const today = asOf || todayISO();
+  const due = t.due || t.date;
+  let st = 'paid';
+  if (rem > 0.009) st = (due < today) ? 'overdue' : (paid > 0 ? 'partial' : 'open');
+  if (rem < -0.009) st = 'over';
+  return { total, paid, rem, due, st, daysOver: rem > 0.009 ? diffDays(today, due) : 0 };
+}
+function sortTx(a, b) {
+  return a.date < b.date ? -1 : a.date > b.date ? 1 :
+    (a.type !== b.type ? (a.type === 'P' ? -1 : 1) : String(a.at || '').localeCompare(String(b.at || '')));
+}
+
+/* moving-average inventory + cost of goods sold per sale */
+function runInventory(db, asOf) {
+  const list = (db.txns || []).filter(t => isActive(t) && (!asOf || t.date <= asOf)).sort(sortTx);
+  const sku = new Map(), cost = new Map();
+  list.forEach(t => {
+    const k = skuKey(t), q = num(t.qty) || calcQty(t);
+    let s = sku.get(k);
+    if (!s) { s = { key: k, label: skuLabel(t), item: t.item, color: t.color || '', unit: t.unit, inQty: 0, outQty: 0, qty: 0, value: 0, lastCost: 0, short: 0 }; sku.set(k, s); }
+    if (t.type === 'P') {
+      const landed = netGoods(t) + num(t.ship);
+      s.inQty += q; s.qty += q; s.value += landed;
+      if (q > 0) s.lastCost = landed / q;
+    } else {
+      s.outQty += q;
+      const avg = s.qty > 0.00001 ? s.value / s.qty : (s.lastCost || 0);
+      const have = Math.max(0, Math.min(q, s.qty));
+      const c = have * avg + (q - have) * (s.lastCost || avg);
+      const known = q - have <= 0.00001 || s.lastCost > 0;
+      cost.set(t.id, { cogs: r2(c), short: q - have > 0.00001, unknown: !known, avg });
+      s.value -= have * avg; s.qty -= have;
+      if (q - have > 0.00001) s.short += q - have;
+      if (s.qty < 0.00001) { s.qty = Math.max(0, s.qty); if (s.qty === 0) s.value = 0; }
+    }
+  });
+  const arr = [...sku.values()].map(s => ({ ...s, avgCost: s.qty > 0.00001 ? s.value / s.qty : 0 }));
+  return { sku: arr, cost };
+}
+
+/* ---------- periods ---------- */
+function getRange(kind, ref, off, custom) {
+  off = off || 0;
+  let s, e, label;
+  const [y0, m0] = ref.split('-').map(Number);
+  if (kind === 'day') {
+    s = e = addDays(ref, off); label = DAYS[dow(s)] + ' ' + longDate(s);
+  } else if (kind === 'week') {
+    s = addDays(ref, -((dow(ref) + 1) % 7) + 7 * off); e = addDays(s, 6);
+    label = 'أسبوع ' + shortDate(s) + ' → ' + shortDate(e) + ' (' + e.slice(0, 4) + ')';
+  } else if (kind === 'month') {
+    const t = m0 - 1 + off, y = y0 + Math.floor(t / 12), m = ((t % 12) + 12) % 12;
+    s = y + '-' + p2(m + 1) + '-01'; e = y + '-' + p2(m + 1) + '-' + p2(daysInMonth(y, m + 1)); label = MONTHS[m] + ' ' + y;
+  } else if (kind === 'quarter') {
+    const t = Math.floor((m0 - 1) / 3) + off, y = y0 + Math.floor(t / 4), q = ((t % 4) + 4) % 4;
+    s = y + '-' + p2(q * 3 + 1) + '-01'; const em = q * 3 + 3; e = y + '-' + p2(em) + '-' + p2(daysInMonth(y, em));
+    label = 'الربع ' + ['الأول', 'الثاني', 'الثالث', 'الرابع'][q] + ' ' + y + ' (' + MONTHS[q * 3] + ' – ' + MONTHS[q * 3 + 2] + ')';
+  } else if (kind === 'year') {
+    const y = y0 + off; s = y + '-01-01'; e = y + '-12-31'; label = 'سنة ' + y;
+  } else {
+    s = (custom && custom.from) || ref; e = (custom && custom.to) || ref; if (e < s) { const x = s; s = e; e = x; }
+    label = longDate(s) + ' → ' + longDate(e);
+  }
+  return { kind, start: s, end: e, label, days: diffDays(e, s) + 1 };
+}
+function buckets(r) {
+  const out = [];
+  const monthly = r.kind === 'year' || (r.kind === 'custom' && r.days > 62);
+  if (r.kind === 'day') {
+    for (let i = 6; i >= 0; i--) { const d = addDays(r.end, -i); out.push({ s: d, e: d, label: shortDate(d) }); }
+  } else if (r.kind === 'quarter') {
+    let s = r.start; while (s <= r.end) { const e = addDays(s, 6) > r.end ? r.end : addDays(s, 6); out.push({ s, e, label: shortDate(s) }); s = addDays(e, 1); }
+  } else if (monthly) {
+    let [y, m] = r.start.split('-').map(Number);
+    const [ey, em] = r.end.split('-').map(Number);
+    while (y < ey || (y === ey && m <= em)) {
+      out.push({ s: y + '-' + p2(m) + '-01', e: y + '-' + p2(m) + '-' + p2(daysInMonth(y, m)), label: MONTHS[m - 1].slice(0, 3) });
+      m++; if (m > 12) { m = 1; y++; }
+    }
+  } else {
+    let s = r.start; while (s <= r.end) { out.push({ s, e: s, label: String(+s.slice(8)) }); s = addDays(s, 1); }
+  }
+  return out;
+}
+
+/* ---------- reports ---------- */
+function summarize(db, start, end, opts) {
+  opts = opts || {};
+  const idx = buildIndex(db);
+  const inv = runInventory(db, end);
+  const R = {
+    start, end,
+    P: { n: 0, goods: 0, disc: 0, ship: 0, total: 0 }, S: { n: 0, goods: 0, disc: 0, ship: 0, total: 0 },
+    cogs: 0, gp: 0, gpPct: 0, shipExpS: 0, shipDirectP: 0, net: 0, costUnknown: 0,
+    cashIn: 0, cashOut: 0, inBy: {}, outBy: {}, items: new Map(), parties: { P: new Map(), S: new Map() }, colors: new Map(),
+  };
+  const bump = (m, key, label, f) => { let o = m.get(key); if (!o) { o = Object.assign({ key, label }, f()); m.set(key, o); } return o; };
+  const blank = () => ({ pQty: 0, pVal: 0, sQty: 0, sVal: 0, cogs: 0, unit: '' });
+  const grpKey = t => (opts.byColor ? [normName(t.item), t.color || '', t.unit].join('|') : [normName(t.item), t.unit].join('|'));
+  const grpLabel = t => t.item + (opts.byColor && t.color ? ' - ' + t.color : '');
+
+  (db.txns || []).filter(isActive).forEach(t => {
+    if (t.date < start || t.date > end) return;
+    const q = num(t.qty) || calcQty(t), ng = netGoods(t), tot = invoiceTotal(t);
+    const side = t.type === 'P' ? R.P : R.S;
+    side.n++; side.goods += num(t.goods); side.disc += num(t.disc); side.ship += num(t.ship); side.total += tot;
+    const it = bump(R.items, grpKey(t), grpLabel(t), blank); it.unit = t.unit;
+    const pa = bump(R.parties[t.type], nameKey(t.party), normName(t.party), () => ({ val: 0, n: 0, phone: '' }));
+    pa.val += tot; pa.n++; if (t.phone) pa.phone = t.phone;
+    if (t.color) { const c = bump(R.colors, t.color, t.color, () => ({ pVal: 0, sVal: 0, pN: 0, sN: 0 })); if (t.type === 'P') { c.pVal += ng; c.pN++; } else { c.sVal += ng; c.sN++; } }
+    if (t.type === 'P') { it.pQty += q; it.pVal += ng + num(t.ship); R.shipDirectP += directShip(t); }
+    else {
+      it.sQty += q; it.sVal += ng;
+      const c = inv.cost.get(t.id); const cg = c ? c.cogs : 0;
+      it.cogs += cg; R.cogs += cg; if (c && (c.short || c.unknown)) R.costUnknown++;
+      R.shipExpS += directShip(t);
+    }
+  });
+  R.gp = r2(R.S.goods - R.S.disc - R.cogs);
+  R.gpPct = (R.S.goods - R.S.disc) > 0 ? R.gp / (R.S.goods - R.S.disc) * 100 : 0;
+  R.net = r2(R.gp - R.shipExpS);
+
+  // cash movements (by payment date), + shipping paid directly on txn date
+  (db.pays || []).filter(isActive).forEach(p => {
+    if (p.date < start || p.date > end) return;
+    const t = idx.tx.get(p.tx); if (!t || !isActive(t)) return;
+    const a = num(p.amt), m = p.method || '—';
+    if (t.type === 'S') { R.cashIn += a; R.inBy[m] = (R.inBy[m] || 0) + a; }
+    else { R.cashOut += a; R.outBy[m] = (R.outBy[m] || 0) + a; }
+  });
+  (db.txns || []).filter(isActive).forEach(t => {
+    if (t.date < start || t.date > end) return;
+    const d = directShip(t); if (d > 0) { R.cashOut += d; R.outBy['شحن مباشر'] = (R.outBy['شحن مباشر'] || 0) + d; }
+  });
+  R.netCash = r2(R.cashIn - R.cashOut);
+
+  // position at end of period
+  R.pos = position(db, end);
+  R.pos.invValue = r2(inv.sku.reduce((a, s) => a + s.value, 0));
+  R.pos.net = r2(R.pos.ar.total + R.pos.invValue - R.pos.ap.total);
+  R.inventory = inv.sku;
+  ['P', 'S'].forEach(k => { R[k].goods = r2(R[k].goods); R[k].total = r2(R[k].total); R[k].ship = r2(R[k].ship); R[k].disc = r2(R[k].disc); });
+  R.cashIn = r2(R.cashIn); R.cashOut = r2(R.cashOut); R.cogs = r2(R.cogs);
+  return R;
+}
+
+/* receivable (S) / payable (P) position with aging */
+function position(db, asOf) {
+  const idx = buildIndex(db);
+  const mk = () => ({ total: 0, overdue: 0, due7: 0, n: 0, buckets: [0, 0, 0, 0, 0], parties: new Map() });
+  const out = { ar: mk(), ap: mk(), asOf };
+  (db.txns || []).filter(t => isActive(t) && t.date <= asOf).forEach(t => {
+    const s = txState(idx, t, asOf);
+    if (s.rem <= 0.009) return;
+    const side = t.type === 'S' ? out.ar : out.ap;
+    side.total += s.rem; side.n++;
+    const late = diffDays(asOf, s.due);
+    const b = late <= 0 ? 0 : late <= 30 ? 1 : late <= 60 ? 2 : late <= 90 ? 3 : 4;
+    side.buckets[b] += s.rem;
+    if (late > 0) side.overdue += s.rem;
+    else if (late >= -7) side.due7 += s.rem;
+    const k = nameKey(t.party);
+    let p = side.parties.get(k);
+    if (!p) { p = { key: k, name: normName(t.party), phone: '', rem: 0, overdue: 0, firstDue: '9999-99-99', items: [] }; side.parties.set(k, p); }
+    p.rem += s.rem; if (late > 0) p.overdue += s.rem; if (t.phone) p.phone = t.phone;
+    if (s.due < p.firstDue) p.firstDue = s.due;
+    p.items.push({ t, s });
+  });
+  ['ar', 'ap'].forEach(k => {
+    const o = out[k]; o.total = r2(o.total); o.overdue = r2(o.overdue); o.due7 = r2(o.due7); o.buckets = o.buckets.map(r2);
+    o.list = [...o.parties.values()].map(p => { p.rem = r2(p.rem); p.overdue = r2(p.overdue); p.items.sort((a, b) => a.s.due < b.s.due ? -1 : 1); return p; })
+      .sort((a, b) => a.firstDue < b.firstDue ? -1 : a.firstDue > b.firstDue ? 1 : b.rem - a.rem);
+  });
+  return out;
+}
+
+/* chart series */
+function series(db, r) {
+  const idx = buildIndex(db);
+  const inv = runInventory(db, r.end);
+  return buckets(r).map(b => {
+    let p = 0, s = 0, g = 0;
+    (db.txns || []).filter(isActive).forEach(t => {
+      if (t.date < b.s || t.date > b.e) return;
+      const ng = netGoods(t);
+      if (t.type === 'P') p += ng + num(t.ship); else { s += ng; g += ng - ((inv.cost.get(t.id) || {}).cogs || 0); }
+    });
+    return Object.assign({}, b, { p: r2(p), s: r2(s), g: r2(g) });
+  });
+}
+
+/* party statement */
+function statement(db, type, partyKey) {
+  const idx = buildIndex(db);
+  const rows = [];
+  (db.txns || []).filter(t => isActive(t) && t.type === type && nameKey(t.party) === partyKey).forEach(t => {
+    rows.push({ date: t.date, at: t.at || '', kind: 'inv', t, debit: invoiceTotal(t), credit: 0 });
+    (idx.pays.get(t.id) || []).filter(isActive).forEach(p => rows.push({ date: p.date, at: p.at || '', kind: 'pay', t, p, debit: 0, credit: num(p.amt) }));
+  });
+  rows.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : (a.kind === b.kind ? String(a.at).localeCompare(String(b.at)) : a.kind === 'inv' ? -1 : 1));
+  let bal = 0; rows.forEach(r => { bal = r2(bal + r.debit - r.credit); r.bal = bal; });
+  return { rows, balance: bal };
+}
+
+function uid(prefix) {
+  const a = new Uint8Array(6);
+  (root.crypto || {}).getRandomValues ? root.crypto.getRandomValues(a) : a.forEach((_, i) => a[i] = Math.floor(Math.random() * 256));
+  return prefix + Date.now().toString(36) + [...a].map(x => x.toString(36).padStart(2, '0')).join('').slice(0, 6);
+}
+
+const Core = { CURRENCY, ITEMS, GROUPS, UNITS, FIELD_LABELS, COUNT_LABEL, FACES, COLORS, METHODS, TERMS, MONTHS, DAYS,
+  parseNum, num, r2, r4, fmt, fmtQty, money, normName, nameKey, p2, parseD, fmtD, addDays, diffDays, dow, todayISO, longDate, shortDate,
+  calcQty, describeSpec, skuKey, skuLabel, isActive, netGoods, invoiceTotal, directShip, buildIndex, paidOf, txState, runInventory,
+  getRange, buckets, summarize, position, series, statement, uid };
+if (typeof module !== 'undefined' && module.exports) module.exports = Core; else root.Core = Core;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+'use strict';
+/* ===== APP: state, storage, sync ===== */
+const C = window.Core;
+const { num, fmt, fmtQty, money } = C;
+const DEFAULT_URL = '';            // ضع هنا رابط تطبيق الويب (Apps Script) ليدخل الشريك بالرقم السري فقط
+const LS = { set: 'foam.settings', db: 'foam.db', out: 'foam.outbox', rev: 'foam.rev' };
+
+const esc = s => String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+const S = window.S = {
+  set: Object.assign({ url: DEFAULT_URL, pin: '', user: '', role: 'admin' }, ls.get(LS.set, {})),
+  db: ls.get(LS.db, { txns: [], pays: [] }),
+  out: ls.get(LS.out, []),
+  rev: ls.get(LS.rev, 0),
+  tab: 'home', status: 'loc', busy: false, lastErr: '',
+  tx: { f: 'all', q: '' },
+  rep: { kind: 'month', off: 0, sub: 'summary', byColor: false, custom: { from: '', to: '' }, stParty: '' },
+  due: { side: 'ar' },
+};
+// ?api=<url> in the link: remember the backend address (so the partner only types the PIN)
+try {
+  const u = new URL(location.href), api = u.searchParams.get('api');
+  if (api) { S.set.url = api; ls.set(LS.set, S.set); u.searchParams.delete('api'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
+} catch (e) {}
+if (!S.set.url && DEFAULT_URL) S.set.url = DEFAULT_URL;
+
+const remote = () => !!S.set.url;
+const canWrite = () => !remote() || S.set.role !== 'view';
+const isAdmin = () => !remote() || S.set.role === 'admin';
+const today = () => C.todayISO();
+const persist = () => { ls.set(LS.db, S.db); ls.set(LS.out, S.out); ls.set(LS.rev, S.rev); ls.set(LS.set, S.set); };
+
+function toast(msg, err) {
+  const old = $('.toast'); if (old) old.remove();
+  const d = document.createElement('div'); d.className = 'toast' + (err ? ' err' : ''); d.textContent = msg; document.body.appendChild(d);
+  setTimeout(() => d.remove(), err ? 5000 : 2600);
+}
+
+/* ---------- local application of operations (optimistic) ---------- */
+function upsert(arr, o) { const i = arr.findIndex(x => x.id === o.id); if (i >= 0) arr[i] = Object.assign({}, arr[i], o); else arr.push(o); }
+function applyLocal(op) {
+  const db = S.db;
+  if (op.op === 'saveTx') {
+    const old = db.txns.find(t => t.id === op.tx.id);
+    const t = Object.assign({}, op.tx, { status: 'active' });
+    if (old) { t.by = old.by; t.at = old.at; t.upd = C.todayISO() + ' · ' + (S.set.user || ''); } else { t.by = S.set.user || ''; t.at = new Date().toISOString().slice(0, 19); }
+    upsert(db.txns, t);
+    (op.pays || []).forEach(p => upsert(db.pays, Object.assign({}, p, { tx: t.id, status: 'active', by: S.set.user || '', at: new Date().toISOString().slice(0, 19) })));
+  } else if (op.op === 'savePay') {
+    upsert(db.pays, Object.assign({}, op.pay, { status: 'active', by: S.set.user || '', at: new Date().toISOString().slice(0, 19) }));
+  } else if (op.op === 'voidTx') { const t = db.txns.find(x => x.id === op.id); if (t) t.status = 'void'; }
+  else if (op.op === 'voidPay') { const p = db.pays.find(x => x.id === op.id); if (p) p.status = 'void'; }
+}
+function commit(ops) {
+  ops.forEach(applyLocal);
+  if (remote()) S.out.push(...ops);
+  persist();
+  render();
+  if (remote()) flush();
+}
+
+/* ---------- backend ---------- */
+async function api(action, extra) {
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const r = await fetch(S.set.url, { method: 'POST', body: JSON.stringify(Object.assign({ pin: S.set.pin, action }, extra || {})), redirect: 'follow', signal: ctl.signal });
+    const j = await r.json();
+    return j;
+  } finally { clearTimeout(to); }
+}
+const AUTH_ERR = /الرقم السري|محاولات|غيّر الرقم/;
+function setStatus(s) { S.status = s; const el = $('#sync'); if (el) el.innerHTML = syncHtml(); }
+function syncHtml() {
+  if (!remote()) return '<span class="dot loc"></span>محلي';
+  const n = S.out.length;
+  if (S.status === 'wait') return '<span class="dot wait"></span>مزامنة…';
+  if (S.status === 'off') return '<span class="dot off"></span>غير متصل' + (n ? ' (' + n + ' معلّق)' : '');
+  return '<span class="dot"></span>' + (n ? n + ' معلّق' : 'متزامن');
+}
+async function flush() {
+  if (!remote() || S.busy) return;
+  S.busy = true; setStatus('wait');
+  try {
+    while (S.out.length) {
+      const batch = S.out.slice(0, 15);
+      const r = await api('batch', { ops: batch });
+      if (!r.ok) {
+        if (AUTH_ERR.test(r.error || '')) { toast(r.error, true); S.out.length = 0; persist(); openSettings(); break; }
+        throw new Error(r.error || 'خطأ');
+      }
+      const bad = (r.results || []).map((x, i) => ({ x, op: batch[i] })).filter(o => !o.x.ok);
+      S.out.splice(0, batch.length);
+      if (bad.length) toast('تعذر حفظ ' + bad.length + ' عملية: ' + bad[0].x.error, true);
+      S.rev = r.rev; persist();
+    }
+    await refresh(true);
+    setStatus('ok');
+  } catch (e) { S.lastErr = String(e.message || e); setStatus('off'); }
+  finally { S.busy = false; setStatus(S.status === 'off' ? 'off' : 'ok'); }
+}
+async function refresh(quiet) {
+  if (!remote()) return;
+  try {
+    if (S.out.length) return;
+    const r = await api('list');
+    if (!r.ok) { if (AUTH_ERR.test(r.error || '')) { toast(r.error, true); openSettings(); } else throw new Error(r.error); return; }
+    S.db = { txns: r.txns, pays: r.pays }; S.rev = r.rev; S.set.user = r.user; S.set.role = r.role; persist(); setStatus('ok'); render();
+  } catch (e) { S.lastErr = String(e.message || e); setStatus('off'); if (!quiet) toast('تعذر الاتصال بالخادم', true); }
+}
+async function poll() {
+  if (!remote() || document.hidden || S.busy) return;
+  if (S.out.length) return flush();
+  try { const r = await api('rev'); if (r.ok && r.rev !== S.rev) await refresh(true); else if (r.ok) setStatus('ok'); } catch (e) { setStatus('off'); }
+}
+
+/* ===== APP: views ===== */
+const U = k => C.UNITS[k] ? C.UNITS[k].short : k;
+const colorHex = n => { const c = C.COLORS.find(x => x[0] === n); return c ? c[1] : '#bbb'; };
+const swatch = n => n ? '<span class="swatch" style="background:' + colorHex(n) + '"></span>' : '';
+const N = v => '<span class="num">' + fmt(v) + '</span>';
+const M = v => '<span class="num">' + fmt(v) + '</span> <span class="xs">' + C.CURRENCY + '</span>';
+const Q = (q, u) => '<span class="num">' + fmtQty(q) + '</span> ' + U(u);
+const PCT = v => '<span class="num">' + fmt(v, 1) + '%</span>';
+const signCls = v => v > 0.005 ? 'pos' : v < -0.005 ? 'neg' : '';
+const STATE_LBL = { paid: 'مسدد', open: 'آجل', partial: 'مسدد جزئيًا', overdue: 'متأخر', over: 'مدفوع زيادة', void: 'ملغى' };
+const sBadge = (st) => '<span class="badge b-' + st + '">' + STATE_LBL[st] + '</span>';
+const txName = t => t.item + (t.color ? ' · ' + t.color : '');
+function dueText(s, type) {
+  if (s.rem <= 0.009) return '';
+  const d = s.daysOver;
+  return d > 0 ? 'متأخر ' + d + ' يوم' : (d === 0 ? 'مستحق اليوم' : 'بعد ' + (-d) + ' يوم');
+}
+function digits(p) { return String(p || '').replace(/\D/g, ''); }
+function waNumber(p) { let d = digits(p); if (d.startsWith('00')) d = d.slice(2); else if (d.startsWith('0')) d = '20' + d.slice(1); return d; }
+function getTx(id) { return S.db.txns.find(t => t.id === id); }
+
+function txCard(t, idx, showDate) {
+  const st = C.txState(idx, t);
+  const void_ = t.status === 'void';
+  return '<button class="item ' + (void_ ? 'void' : '') + '" data-act="detail" data-id="' + esc(t.id) + '">' +
+    '<div class="t1"><span><span class="tag ' + t.type + '">' + (t.type === 'P' ? 'شراء' : 'بيع') + '</span> ' + esc(t.party) + '</span><span>' + M(st.total) + '</span></div>' +
+    '<div class="t2">' + swatch(t.color) + esc(txName(t)) + ' — ' + Q(num(t.qty) || C.calcQty(t), t.unit) + (showDate ? ' · ' + C.shortDate(t.date) : '') + '</div>' +
+    '<div class="t3"><span class="xs muted">' + (st.rem > 0.009 && !void_ ? 'متبقي ' + fmt(st.rem) + ' · ' + dueText(st) : '') + '</span>' + (void_ ? sBadge('void') : sBadge(st.st)) + '</div></button>';
+}
+
+/* ---------------- HOME ---------------- */
+function viewHome() {
+  const td = today(), idx = C.buildIndex(S.db);
+  const R = C.summarize(S.db, td, td);
+  const pos = C.position(S.db, td);
+  const mon = C.getRange('month', td, 0), RM = C.summarize(S.db, mon.start, td);
+  const last = S.db.txns.filter(C.isActive).slice().sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || ''))).slice(0, 6);
+  const alerts = [];
+  if (pos.ar.overdue > 0) alerts.push(['bad', '⚠', 'متأخر لنا عند العملاء', pos.ar.overdue, 'ar']);
+  if (pos.ap.overdue > 0) alerts.push(['bad', '⚠', 'متأخر علينا للموردين', pos.ap.overdue, 'ap']);
+  if (pos.ap.due7 > 0) alerts.push(['warn', '⏰', 'مستحق علينا خلال 7 أيام', pos.ap.due7, 'ap']);
+  if (pos.ar.due7 > 0) alerts.push(['warn', '⏰', 'مستحق لنا خلال 7 أيام', pos.ar.due7, 'ar']);
+  return '<div class="page-title"><h2>أهلًا ' + esc(S.set.user || '') + ' 👋</h2><span class="muted sm">' + C.DAYS[C.dow(td)] + ' ' + C.longDate(td) + '</span></div>' +
+    (canWrite() ? '<div class="grid2" style="margin-bottom:12px"><button class="btn pur" data-act="new" data-type="P">＋ شراء جديد</button><button class="btn sal" data-act="new" data-type="S">＋ بيع جديد</button></div>' : '') +
+    '<div class="card"><h3>📅 اليوم</h3><div class="grid2">' +
+    '<div class="kpi pur"><div class="l">مشتريات اليوم</div><div class="v">' + M(R.P.total) + '</div><div class="s">' + R.P.n + ' عملية</div></div>' +
+    '<div class="kpi sal"><div class="l">مبيعات اليوم</div><div class="v">' + M(R.S.total) + '</div><div class="s">' + R.S.n + ' عملية</div></div>' +
+    '<div class="kpi"><div class="l">المحصّل اليوم</div><div class="v">' + M(R.cashIn) + '</div></div>' +
+    '<div class="kpi"><div class="l">المدفوع اليوم</div><div class="v">' + M(R.cashOut) + '</div></div></div></div>' +
+    '<div class="card"><h3>⚖ المركز الحالي</h3>' +
+    '<div class="kv"><span class="k">لنا عند العملاء</span><b class="pos">' + M(pos.ar.total) + '</b></div>' +
+    '<div class="kv"><span class="k">علينا للموردين</span><b class="neg">' + M(pos.ap.total) + '</b></div>' +
+    '<div class="kv"><span class="k">قيمة المخزون (تكلفة)</span><b>' + M(RM.pos.invValue) + '</b></div>' +
+    '<div class="kv tot"><span>صافي المركز</span><b class="' + signCls(RM.pos.net) + '">' + M(RM.pos.net) + '</b></div></div>' +
+    (alerts.length ? '<div class="card"><h3>🔔 تنبيهات</h3>' + alerts.map(a => '<button class="item" style="margin-bottom:8px" data-act="goDue" data-side="' + a[4] + '"><div class="t1"><span>' + a[1] + ' ' + a[2] + '</span><span class="' + (a[0] === 'bad' ? 'neg' : '') + '">' + M(a[3]) + '</span></div></button>').join('') + '</div>' : '') +
+    '<div class="card"><h3>📈 هذا الشهر حتى اليوم</h3><div class="grid2">' +
+    '<div class="kpi pri"><div class="l">مجمل الربح التقديري</div><div class="v">' + M(RM.gp) + '</div><div class="s">هامش ' + PCT(RM.gpPct) + '</div></div>' +
+    '<div class="kpi"><div class="l">صافي النقدية</div><div class="v ' + signCls(RM.netCash) + '">' + M(RM.netCash) + '</div></div></div></div>' +
+    '<div class="page-title"><h2 style="font-size:1.05rem">آخر الحركات</h2><button class="btn ghost sm" data-act="tab" data-tab="tx">عرض الكل</button></div>' +
+    (last.length ? last.map(t => txCard(t, idx, true)).join('') : '<div class="empty"><div class="big">🧾</div>لا توجد حركات بعد — ابدأ بتسجيل أول عملية شراء أو بيع.</div>');
+}
+
+/* ---------------- TRANSACTIONS ---------------- */
+function viewTx() {
+  const idx = C.buildIndex(S.db), f = S.tx.f, q = C.nameKey(S.tx.q || '');
+  let list = S.db.txns.slice();
+  if (f !== 'void') list = list.filter(C.isActive); else list = list.filter(t => t.status === 'void');
+  if (f === 'P' || f === 'S') list = list.filter(t => t.type === f);
+  if (f === 'open') list = list.filter(t => C.txState(idx, t).rem > 0.009);
+  if (q) list = list.filter(t => C.nameKey([t.party, t.item, t.color, t.phone, t.note].join(' ')).includes(q));
+  list.sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || '')));
+  const total = list.reduce((a, t) => a + C.invoiceTotal(t), 0);
+  let html = '<div class="page-title"><h2>الحركات</h2><button class="btn ghost sm" data-act="csv">⬇ تصدير Excel</button></div>' +
+    '<input type="search" id="txq" placeholder="🔍 بحث: اسم، صنف، لون، هاتف…" value="' + esc(S.tx.q) + '" data-f="txq" style="margin-bottom:8px">' +
+    '<div class="chips">' + [['all', 'الكل'], ['P', 'مشتريات'], ['S', 'مبيعات'], ['open', 'غير مسددة'], ['void', 'الملغاة']].map(c => '<button class="chip ' + (f === c[0] ? 'on' : '') + '" data-act="txf" data-f="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>' +
+    '<div class="muted sm" style="margin:2px 4px 6px">' + list.length + ' حركة · إجمالي ' + M(total) + '</div>';
+  if (!list.length) return html + '<div class="empty"><div class="big">🗂</div>لا توجد حركات مطابقة.</div>';
+  let cur = '';
+  list.slice(0, 300).forEach(t => {
+    if (t.date !== cur) { cur = t.date; html += '<div class="dayhdr">' + C.DAYS[C.dow(cur)] + ' ' + C.longDate(cur) + '</div>'; }
+    html += txCard(t, idx, false);
+  });
+  if (list.length > 300) html += '<div class="muted c sm">يُعرض أحدث 300 حركة — استخدم البحث أو التقارير للمزيد.</div>';
+  return html;
+}
+
+/* ---------------- DUES (receivables / payables) ---------------- */
+function agingHtml(side) {
+  const b = side.buckets, tot = b.reduce((a, x) => a + x, 0) || 1;
+  const names = ['لم تستحق', '1–30 يوم', '31–60', '61–90', '+90'];
+  return '<div class="aging">' + b.map((x, i) => x > 0 ? '<span class="ag' + i + '" style="width:' + (x / tot * 100) + '%"></span>' : '').join('') + '</div>' +
+    '<div class="agleg">' + b.map((x, i) => '<div>' + names[i] + '<b class="num">' + fmt(x) + '</b></div>').join('') + '</div>';
+}
+function viewDues() {
+  const td = today(), pos = C.position(S.db, td), sd = S.due.side, side = sd === 'ar' ? pos.ar : pos.ap;
+  const lbl = sd === 'ar' ? ['لنا عند العملاء', 'عميل'] : ['علينا للموردين', 'مورد'];
+  let html = '<div class="page-title"><h2>المستحقات</h2></div>' +
+    '<div class="seg" style="margin-bottom:12px"><button class="' + (sd === 'ar' ? 'on' : '') + '" data-act="side" data-side="ar">لنا (العملاء)</button><button class="' + (sd === 'ap' ? 'on' : '') + '" data-act="side" data-side="ap">علينا (الموردون)</button></div>' +
+    '<div class="card"><div class="grid2"><div class="kpi ' + (sd === 'ar' ? 'sal' : 'pur') + '"><div class="l">الإجمالي ' + lbl[0] + '</div><div class="v">' + M(side.total) + '</div><div class="s">' + side.n + ' فاتورة · ' + side.list.length + ' ' + lbl[1] + '</div></div>' +
+    '<div class="kpi ' + (side.overdue > 0 ? 'bad' : '') + '"><div class="l">المتأخر</div><div class="v">' + M(side.overdue) + '</div><div class="s">يستحق خلال 7 أيام: ' + fmt(side.due7) + '</div></div></div>' +
+    '<div class="lbl" style="margin-top:12px">أعمار الديون</div>' + agingHtml(side) + '</div>';
+  if (!side.list.length) return html + '<div class="empty"><div class="big">✅</div>لا توجد مستحقات ' + (sd === 'ar' ? 'لنا' : 'علينا') + ' — كل شيء مسدد.</div>';
+  side.list.forEach(p => {
+    const od = p.items.some(i => i.s.daysOver > 0);
+    html += '<details class="party"><summary><div class="t1" style="display:flex;justify-content:space-between;font-weight:800"><span>' + esc(p.name) + '</span><span>' + M(p.rem) + '</span></div>' +
+      '<div class="muted sm" style="margin-top:2px">' + p.items.length + ' فاتورة · أقرب استحقاق ' + C.longDate(p.firstDue) + (p.overdue > 0 ? ' · <span class="neg b">متأخر ' + fmt(p.overdue) + '</span>' : '') + '</div></summary><div class="inner">' +
+      p.items.map(i => '<div class="inv"><div><button class="btn ghost sm" style="min-height:32px;padding:4px 10px" data-act="detail" data-id="' + esc(i.t.id) + '">' + C.shortDate(i.t.date) + '</button> <span class="sm">' + swatch(i.t.color) + esc(i.t.item.slice(0, 30)) + '</span><div class="xs ' + (i.s.daysOver > 0 ? 'neg b' : 'muted') + '" style="margin-top:3px">' + C.longDate(i.s.due) + ' · ' + dueText(i.s) + '</div></div><div class="c"><b>' + M(i.s.rem) + '</b><br>' + (canWrite() ? '<button class="btn sm ' + (sd === 'ar' ? 'sal' : 'pur') + '" style="margin-top:4px" data-act="pay" data-id="' + esc(i.t.id) + '">' + (sd === 'ar' ? 'تحصيل' : 'سداد') + '</button>' : '') + '</div></div>').join('') +
+      '<div class="row wrap" style="margin-top:8px">' +
+      (p.phone ? '<a class="btn ghost sm" href="tel:' + esc(digits(p.phone)) + '" style="text-decoration:none">📞 اتصال</a>' : '') +
+      (sd === 'ar' && p.phone ? '<button class="btn ghost sm" data-act="remind" data-party="' + esc(p.key) + '">💬 تذكير واتساب</button>' : '') +
+      '<button class="btn ghost sm" data-act="stmt" data-type="' + (sd === 'ar' ? 'S' : 'P') + '" data-party="' + esc(p.key) + '">📄 كشف حساب</button></div></div></details>';
+  });
+  return html;
+}
+
+/* ---------------- REPORTS ---------------- */
+function periodNav(r) {
+  const kinds = [['day', 'يومي'], ['week', 'أسبوعي'], ['month', 'شهري'], ['quarter', 'ربع سنوي'], ['year', 'سنوي'], ['custom', 'مخصص']];
+  return '<div class="chips">' + kinds.map(k => '<button class="chip ' + (S.rep.kind === k[0] ? 'on' : '') + '" data-act="rkind" data-k="' + k[0] + '">' + k[1] + '</button>').join('') + '</div>' +
+    (S.rep.kind === 'custom'
+      ? '<div class="g2" style="margin:6px 0 10px"><div class="fld" style="margin:0"><label>من</label><input type="date" data-f="cfrom" value="' + esc(S.rep.custom.from || r.start) + '"></div><div class="fld" style="margin:0"><label>إلى</label><input type="date" data-f="cto" value="' + esc(S.rep.custom.to || r.end) + '"></div></div>'
+      : '<div class="period"><button data-act="roff" data-d="-1" aria-label="السابق">›</button><div class="lab">' + esc(r.label) + '</div><button data-act="roff" data-d="1" aria-label="التالي">‹</button></div>');
+}
+function curRange() { return C.getRange(S.rep.kind, today(), S.rep.off, S.rep.custom); }
+function chartHtml(ser) {
+  const mx = Math.max(1, ...ser.map(x => Math.max(x.p, x.s)));
+  const many = ser.length > 16;
+  return '<div class="bars">' + ser.map((x, i) => '<div class="col2" title="' + esc(x.label) + '"><div class="pair"><div class="bar p" style="height:' + (x.p / mx * 100) + '%"></div><div class="bar s" style="height:' + (x.s / mx * 100) + '%"></div></div><div class="lab">' + (many && i % 3 ? '' : esc(x.label)) + '</div></div>').join('') + '</div>' +
+    '<div class="legend"><span><i style="background:var(--pur)"></i>مشتريات</span><span><i style="background:var(--sal)"></i>مبيعات</span></div>';
+}
+function itemCards(R, byColor) {
+  const arr = [...R.items.values()].sort((a, b) => (b.sVal + b.pVal) - (a.sVal + a.pVal));
+  if (!arr.length) return '<div class="empty">لا توجد حركات في هذه الفترة.</div>';
+  return arr.map(it => '<div class="card" style="padding:12px;margin-bottom:9px"><div class="b" style="margin-bottom:6px">' + (byColor ? swatch((it.label.split(' - ')[1]) || '') : '') + esc(it.label) + ' <span class="muted sm">(' + U(it.unit) + ')</span></div>' +
+    '<div class="grid2"><div class="kpi pur" style="min-height:0;padding:8px 10px"><div class="l">اشترينا</div><div class="v" style="font-size:1rem">' + Q(it.pQty, it.unit) + '</div><div class="s">' + M(it.pVal) + (it.pQty > 0 ? ' · ' + fmt(it.pVal / it.pQty) + '/' + U(it.unit) : '') + '</div></div>' +
+    '<div class="kpi sal" style="min-height:0;padding:8px 10px"><div class="l">بعنا</div><div class="v" style="font-size:1rem">' + Q(it.sQty, it.unit) + '</div><div class="s">' + M(it.sVal) + (it.sQty > 0 ? ' · ' + fmt(it.sVal / it.sQty) + '/' + U(it.unit) : '') + '</div></div></div>' +
+    (it.sQty > 0 ? '<div class="kv sub" style="margin-top:6px"><span class="k">مجمل الربح التقديري</span><b class="' + signCls(it.sVal - it.cogs) + '">' + M(it.sVal - it.cogs) + ' <span class="xs">(' + PCT(it.sVal > 0 ? (it.sVal - it.cogs) / it.sVal * 100 : 0) + ')</span></b></div>' : '') + '</div>').join('');
+}
+function topList(map, cls) {
+  const arr = [...map.values()].sort((a, b) => b.val - a.val).slice(0, 5);
+  if (!arr.length) return '<div class="muted sm">—</div>';
+  const mx = arr[0].val || 1;
+  return arr.map(p => '<div class="kv"><span>' + esc(p.label) + ' <span class="xs muted">(' + p.n + ')</span><div style="height:5px;border-radius:3px;background:var(--' + cls + ');width:' + Math.max(4, p.val / mx * 100) + '%;opacity:.55;margin-top:3px"></div></span><b>' + M(p.val) + '</b></div>').join('');
+}
+function methodList(o) {
+  const e = Object.entries(o).sort((a, b) => b[1] - a[1]);
+  return e.length ? e.map(x => '<div class="kv sub"><span class="k">' + esc(x[0]) + '</span><b>' + M(x[1]) + '</b></div>').join('') : '<div class="muted sm">—</div>';
+}
+function reportText(R, r) {
+  const L = [];
+  L.push('📊 تقرير الفوم — ' + r.label); L.push('');
+  L.push('🛒 المشتريات: ' + fmt(R.P.total) + ' ' + C.CURRENCY + ' (' + R.P.n + ' عملية)');
+  L.push('💰 المبيعات: ' + fmt(R.S.total) + ' ' + C.CURRENCY + ' (' + R.S.n + ' عملية)');
+  L.push('📈 مجمل الربح التقديري: ' + fmt(R.gp) + ' (' + fmt(R.gpPct, 1) + '%)');
+  L.push('💵 المحصّل: ' + fmt(R.cashIn) + ' | المدفوع: ' + fmt(R.cashOut) + ' | الصافي: ' + fmt(R.netCash)); L.push('');
+  L.push('⬅ لنا عند العملاء: ' + fmt(R.pos.ar.total) + ' (متأخر ' + fmt(R.pos.ar.overdue) + ')');
+  L.push('➡ علينا للموردين: ' + fmt(R.pos.ap.total) + ' (متأخر ' + fmt(R.pos.ap.overdue) + ')');
+  L.push('📦 المخزون بالتكلفة: ' + fmt(R.pos.invValue));
+  L.push('⚖ صافي المركز: ' + fmt(R.pos.net));
+  return L.join('\n');
+}
+function viewReports() {
+  const sub = S.rep.sub;
+  let html = '<div class="page-title"><h2>التقارير</h2></div><div class="seg" style="margin-bottom:12px">' +
+    [['summary', 'ملخص الفترة'], ['stock', 'المخزون'], ['stmt', 'كشف حساب']].map(x => '<button class="' + (sub === x[0] ? 'on' : '') + '" data-act="rsub" data-s="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
+  if (sub === 'stock') return html + viewStock();
+  if (sub === 'stmt') return html + viewStatement();
+  const r = curRange(), R = C.summarize(S.db, r.start, r.end, { byColor: S.rep.byColor }), ser = C.series(S.db, r);
+  html += periodNav(r);
+  html += '<div class="print-only"><h2>تقرير الفوم — ' + esc(r.label) + '</h2></div>';
+  html += '<div class="grid2" style="margin-bottom:12px">' +
+    '<div class="kpi pur"><div class="l">المشتريات</div><div class="v">' + M(R.P.total) + '</div><div class="s">' + R.P.n + ' عملية</div></div>' +
+    '<div class="kpi sal"><div class="l">المبيعات</div><div class="v">' + M(R.S.total) + '</div><div class="s">' + R.S.n + ' عملية</div></div>' +
+    '<div class="kpi pri"><div class="l">مجمل الربح التقديري</div><div class="v ' + signCls(R.gp) + '">' + M(R.gp) + '</div><div class="s">هامش ' + PCT(R.gpPct) + '</div></div>' +
+    '<div class="kpi"><div class="l">صافي النقدية</div><div class="v ' + signCls(R.netCash) + '">' + M(R.netCash) + '</div><div class="s">+' + fmt(R.cashIn) + ' / −' + fmt(R.cashOut) + '</div></div></div>';
+  if (R.costUnknown) html += '<div class="warnbox">⚠ ' + R.costUnknown + ' عملية بيع لا يوجد لها مخزون مشترى كافٍ في السجل — الربح التقديري لها غير دقيق. سجّل المشتريات السابقة أو راجع وحدة/مقاس الصنف.</div>';
+  html += '<div class="card"><h3>🧮 قائمة الدخل المبسطة</h3>' +
+    '<div class="kv"><span class="k">إيراد المبيعات (صافي الخصم)</span><b>' + M(R.S.goods - R.S.disc) + '</b></div>' +
+    '<div class="kv sub"><span class="k">تكلفة البضاعة المباعة (متوسط مرجح شامل الشحن)</span><b class="neg">−' + M(R.cogs) + '</b></div>' +
+    '<div class="kv tot"><span>مجمل الربح</span><b class="' + signCls(R.gp) + '">' + M(R.gp) + '</b></div>' +
+    '<div class="kv sub"><span class="k">شحن مبيعات علينا</span><b class="neg">−' + M(R.shipExpS) + '</b></div>' +
+    '<div class="kv tot"><span>صافي الربح التشغيلي التقديري</span><b class="' + signCls(R.net) + '">' + M(R.net) + '</b></div>' +
+    '<div class="hint">الأرقام تقديرية: تعتمد على اتساق وحدة الشراء والبيع لنفس الصنف.</div></div>';
+  html += '<div class="card"><h3>🛒 تفصيل المشتريات</h3>' +
+    '<div class="kv"><span class="k">ثمن البضاعة</span><b>' + M(R.P.goods) + '</b></div><div class="kv sub"><span class="k">خصومات</span><b>−' + M(R.P.disc) + '</b></div><div class="kv sub"><span class="k">شحن</span><b>' + M(R.P.ship) + '</b></div><div class="kv tot"><span>إجمالي فواتير الموردين</span><b>' + M(R.P.total) + '</b></div></div>';
+  html += '<div class="card"><h3>⚖ المركز المالي في ' + esc(C.longDate(r.end)) + '</h3>' +
+    '<div class="kv"><span class="k">لنا عند العملاء</span><b class="pos">' + M(R.pos.ar.total) + '</b></div><div class="kv sub"><span class="k">منها متأخر</span><b class="neg">' + M(R.pos.ar.overdue) + '</b></div>' +
+    '<div class="kv"><span class="k">علينا للموردين</span><b class="neg">' + M(R.pos.ap.total) + '</b></div><div class="kv sub"><span class="k">منها متأخر</span><b class="neg">' + M(R.pos.ap.overdue) + '</b></div>' +
+    '<div class="kv"><span class="k">المخزون بالتكلفة</span><b>' + M(R.pos.invValue) + '</b></div>' +
+    '<div class="kv tot"><span>صافي المركز (لنا + مخزون − علينا)</span><b class="' + signCls(R.pos.net) + '">' + M(R.pos.net) + '</b></div></div>';
+  html += '<div class="card"><h3>📊 الاتجاه</h3>' + chartHtml(ser) + '</div>';
+  html += '<div class="page-title" style="margin-top:6px"><h2 style="font-size:1.05rem">📦 حسب الصنف</h2><button class="chip ' + (S.rep.byColor ? 'on' : '') + '" data-act="bycolor">تفصيل اللون</button></div>' + itemCards(R, S.rep.byColor);
+  html += '<div class="card"><h3>💵 التدفقات النقدية</h3><div class="b sm">المحصّل من العملاء: ' + M(R.cashIn) + '</div>' + methodList(R.inBy) + '<div class="b sm" style="margin-top:10px">المدفوع: ' + M(R.cashOut) + '</div>' + methodList(R.outBy) + '</div>';
+  html += '<div class="card"><h3>🏆 أعلى العملاء</h3>' + topList(R.parties.S, 'sal') + '</div><div class="card"><h3>🏭 أعلى الموردين</h3>' + topList(R.parties.P, 'pur') + '</div>';
+  html += '<div class="row wrap noprint"><button class="btn sal grow" data-act="share">💬 مشاركة واتساب</button><button class="btn ghost grow" data-act="print">🖨 طباعة / PDF</button></div>';
+  window._lastReport = { R, r };
+  return html;
+}
+function viewStock() {
+  const td = today(), inv = C.runInventory(S.db, td).sku.filter(s => s.inQty > 0 || s.outQty > 0).sort((a, b) => b.value - a.value);
+  const tv = inv.reduce((a, s) => a + s.value, 0);
+  let html = '<div class="card"><div class="kpi pri"><div class="l">قيمة المخزون الحالي بالتكلفة</div><div class="v">' + M(tv) + '</div><div class="s">' + inv.filter(s => s.qty > 0.00001).length + ' صنف برصيد</div></div></div>';
+  if (!inv.length) return html + '<div class="empty"><div class="big">📦</div>لا توجد حركات مخزون.</div>';
+  html += inv.map(s => '<div class="card" style="padding:12px;margin-bottom:9px"><div class="b">' + swatch(s.color) + esc(s.label) + '</div>' +
+    '<div class="grid2" style="margin-top:6px"><div><div class="muted xs">الرصيد</div><b style="font-size:1.1rem">' + Q(s.qty, s.unit) + '</b></div><div><div class="muted xs">متوسط التكلفة</div><b>' + M(s.avgCost) + '/' + U(s.unit) + '</b></div>' +
+    '<div><div class="muted xs">وارد / منصرف</div>' + Q(s.inQty, s.unit) + ' / ' + Q(s.outQty, s.unit) + '</div><div><div class="muted xs">قيمة الرصيد</div><b>' + M(s.value) + '</b></div></div>' +
+    (s.short > 0.00001 ? '<div class="warnbox" style="margin:8px 0 0">⚠ بعنا أكثر من المسجل مشترى بمقدار ' + fmtQty(s.short) + ' ' + U(s.unit) + ' — راجع الوحدة/المقاس أو سجّل المشتريات.</div>' : '') + '</div>').join('');
+  return html + '<div class="hint">الرصيد = المشترى − المباع لنفس (الصنف + اللون + السمك/القطر/الوجه + الوحدة). التكلفة بالمتوسط المرجح شاملة الشحن.</div>';
+}
+function viewStatement() {
+  const idx = C.buildIndex(S.db);
+  const parts = { S: new Map(), P: new Map() };
+  S.db.txns.filter(C.isActive).forEach(t => { const k = C.nameKey(t.party); if (!parts[t.type].has(k)) parts[t.type].set(k, C.normName(t.party)); });
+  const opt = (type, lab) => '<optgroup label="' + lab + '">' + [...parts[type].entries()].sort((a, b) => a[1].localeCompare(b[1], 'ar')).map(([k, n]) => '<option value="' + type + '|' + esc(k) + '"' + (S.rep.stParty === type + '|' + k ? ' selected' : '') + '>' + esc(n) + '</option>').join('') + '</optgroup>';
+  let html = '<div class="fld"><label>اختر العميل أو المورد</label><select data-f="stparty"><option value="">— اختر —</option>' + opt('S', 'العملاء') + opt('P', 'الموردون') + '</select></div>';
+  if (!S.rep.stParty) return html + '<div class="empty">اختر طرفًا لعرض كشف حسابه.</div>';
+  const [type, key] = S.rep.stParty.split('|'), st = C.statement(S.db, type, key), name = parts[type].get(key) || '';
+  html += '<div class="card"><h3>' + (type === 'S' ? 'كشف حساب عميل' : 'كشف حساب مورد') + ' — ' + esc(name) + '</h3>';
+  html += '<div class="stmt-row b muted xs"><span>التاريخ</span><span>البيان</span><span>' + (type === 'S' ? 'علينا له' : 'مشتريات') + '</span><span>الرصيد</span></div>';
+  html += st.rows.map(r => '<div class="stmt-row"><span class="xs">' + C.shortDate(r.date) + '</span><span>' + (r.kind === 'inv' ? esc(r.t.item) + (r.t.color ? ' · ' + esc(r.t.color) : '') : '<span class="pos b">' + (type === 'S' ? 'تحصيل' : 'سداد') + '</span> ' + esc(r.p.method || '')) + '</span><span class="num ' + (r.kind === 'pay' ? 'pos' : '') + '">' + (r.debit ? fmt(r.debit) : '−' + fmt(r.credit)) + '</span><b class="num">' + fmt(r.bal) + '</b></div>').join('');
+  html += '<div class="kv tot"><span>الرصيد المستحق ' + (type === 'S' ? 'لنا' : 'علينا') + '</span><b class="' + (type === 'S' ? 'pos' : 'neg') + '">' + M(st.balance) + '</b></div></div>' +
+    '<div class="row wrap noprint"><button class="btn sal grow" data-act="shareStmt">💬 مشاركة واتساب</button><button class="btn ghost grow" data-act="print">🖨 طباعة / PDF</button></div>';
+  return html;
+}
+
+/* ---------------- shell ---------------- */
+function render() {
+  const m = $('#main'); if (!m) return;
+  const keepScroll = window.scrollY;
+  const views = { home: viewHome, tx: viewTx, dues: viewDues, reports: viewReports };
+  const focusId = document.activeElement && document.activeElement.id;
+  const caret = document.activeElement && document.activeElement.selectionStart;
+  m.innerHTML = (views[S.tab] || viewHome)();
+  $$('nav.bar button[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
+  const pos = C.position(S.db, today()), od = pos.ar.overdue > 0 || pos.ap.overdue > 0;
+  const pill = $('#pill'); if (pill) pill.classList.toggle('hide', !od);
+  const sy = $('#sync'); if (sy) sy.innerHTML = syncHtml();
+  if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) {} } }
+  window.scrollTo(0, keepScroll);
+}
+
+/* ===== APP: sheets, forms, actions ===== */
+let F = null;   // entry-form state
+const modal = () => $('#modal');
+function openSheet(title, body, footer, cls) {
+  const old = $('#scrim'); if (old) old.remove();
+  const d = document.createElement('div'); d.className = 'scrim'; d.id = 'scrim';
+  d.innerHTML = '<div class="sheet ' + (cls || '') + '" role="dialog"><header><h2>' + title + '</h2><button class="x" data-act="close" aria-label="إغلاق">✕</button></header><div class="body" id="sheetBody">' + body + '</div>' + (footer ? '<footer>' + footer + '</footer>' : '') + '</div>';
+  document.body.appendChild(d); document.body.style.overflow = 'hidden';
+}
+function closeSheet() { const d = $('#scrim'); if (d) d.remove(); document.body.style.overflow = ''; F = null; window._pay = null; }
+
+/* ---------- item catalogue ---------- */
+function allItems() {
+  const m = new Map(C.ITEMS.map(i => [i.name, i.grp]));
+  S.db.txns.forEach(t => { if (t.item && !m.has(t.item)) m.set(t.item, t.grp || 'sheet'); });
+  return [...m.entries()].map(([name, grp]) => ({ name, grp }));
+}
+function partyNames(type) {
+  const m = new Map();
+  S.db.txns.filter(t => t.type === type).sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || ''))).forEach(t => { const k = C.nameKey(t.party); if (!m.has(k)) m.set(k, { name: C.normName(t.party), phone: t.phone || '' }); else if (!m.get(k).phone && t.phone) m.get(k).phone = t.phone; });
+  return [...m.values()];
+}
+
+/* ---------- entry form ---------- */
+function newForm(type) {
+  return { id: C.uid('t'), type, date: today(), party: '', phone: '', item: '', grp: '', color: '', unit: '', thick: '', width: '', length: '', count: '', tot: '', dIn: '', dOut: '', arm1: '', arm2: '', face: '',
+    price: '', goods: '', disc: '', ship: '', shipMode: 'billed', note: '', due: '', term: 30, _last: 'price', payMode: null, paid: '', method: 'كاش', payDate: today(), _edit: false };
+}
+function formFromTx(t) {
+  const f = newForm(t.type); ['id', 'type', 'date', 'party', 'phone', 'item', 'grp', 'color', 'unit', 'thick', 'width', 'length', 'count', 'tot', 'dIn', 'dOut', 'arm1', 'arm2', 'face', 'price', 'goods', 'disc', 'ship', 'shipMode', 'note', 'due'].forEach(k => { f[k] = t[k] === undefined || t[k] === null ? '' : t[k]; });
+  f._edit = true; f.term = null; f._last = 'goods'; return f;
+}
+function openForm(type, tx, asCopy) {
+  if (!canWrite()) return toast('صلاحيتك عرض فقط', true);
+  F = tx ? (asCopy ? Object.assign(formFromTx(tx), { id: C.uid('t'), _edit: false, date: today(), term: 30, payMode: null, payDate: today(), due: '' }) : formFromTx(tx)) : newForm(type);
+  const P = F.type === 'P';
+  openSheet((F._edit ? 'تعديل ' : 'تسجيل ') + (P ? 'عملية شراء' : 'عملية بيع'), formBody(), '<button class="btn ' + (P ? 'pur' : 'sal') + '" data-act="save">💾 حفظ</button><button class="btn ghost" data-act="close" style="flex:0 0 90px">إلغاء</button>');
+  recalc(true);
+}
+function dimsHtml() {
+  const g = C.GROUPS[F.grp]; if (!g) return '<div class="muted sm">اختر الصنف لتظهر المقاسات.</div>';
+  const lab = k => k === 'count' ? (C.COUNT_LABEL[F.grp] || 'العدد') : k === 'tot' ? (F.unit === 'm2' ? 'إجمالي المتر المربع (اختياري)' : 'إجمالي الأمتار الطولية (اختياري)') : C.FIELD_LABELS[k];
+  return '<div class="g2">' + g.fields.map(k => k === 'face'
+    ? '<div class="fld" style="grid-column:1/-1"><label>' + lab(k) + '</label><select data-ff="face"><option value="">— اختر —</option>' + C.FACES.map(x => '<option' + (F.face === x ? ' selected' : '') + '>' + x + '</option>').join('') + '</select></div>'
+    : '<div class="fld"><label>' + lab(k) + '</label><input class="num-in" inputmode="decimal" type="text" autocomplete="off" data-ff="' + k + '" value="' + esc(F[k]) + '"></div>').join('') + '</div>';
+}
+function unitSegHtml() {
+  const g = C.GROUPS[F.grp]; if (!g) return '';
+  return '<div class="seg">' + g.units.map(u => '<button type="button" class="' + (F.unit === u ? 'on' : '') + '" data-act="unit" data-u="' + u + '">' + C.UNITS[u].label + '</button>').join('') + '</div>';
+}
+function formBody() {
+  const P = F.type === 'P', pn = partyNames(F.type);
+  const items = allItems();
+  return '<datalist id="dl-party">' + pn.map(p => '<option value="' + esc(p.name) + '">').join('') + '</datalist>' +
+    '<div class="g2"><div class="fld"><label>التاريخ</label><input type="date" data-ff="date" value="' + esc(F.date) + '"></div>' +
+    '<div class="fld"><label>' + (P ? 'المورد (شخص / شركة / مصنع)' : 'اسم الزبون') + '</label><input type="text" list="dl-party" data-ff="party" autocomplete="off" value="' + esc(F.party) + '" placeholder="' + (P ? 'اسم المورد' : 'اسم الزبون') + '"></div></div>' +
+    '<div class="fld"><label>رقم التليفون ' + (P ? '(اختياري)' : '') + '</label><input type="tel" inputmode="tel" data-ff="phone" value="' + esc(F.phone) + '" placeholder="01xxxxxxxxx"></div>' +
+    '<div class="sect">الصنف والمواصفات</div>' +
+    '<div class="fld"><label>الصنف</label><select data-ff="item"><option value="">— اختر الصنف —</option>' + items.map(i => '<option' + (F.item === i.name ? ' selected' : '') + '>' + esc(i.name) + '</option>').join('') + '<option value="__new">＋ صنف جديد…</option></select></div>' +
+    '<div id="newitem" class="hide card" style="padding:10px"><div class="fld"><label>اسم الصنف الجديد</label><input type="text" id="niName"></div><div class="fld"><label>يُقاس مثل</label><select id="niGrp">' + Object.entries(C.GROUPS).map(([k, g]) => '<option value="' + k + '">' + g.label + '</option>').join('') + '</select></div><button class="btn sm" type="button" data-act="addItem">إضافة الصنف</button></div>' +
+    '<div class="fld"><label>اللون</label><div class="colors" id="colors">' + colorsHtml() + '</div></div>' +
+    '<div id="dims">' + dimsHtml() + '</div>' +
+    '<div class="fld"><label>وحدة التسعير</label><div id="unitseg">' + unitSegHtml() + '</div></div>' +
+    '<div class="calc"><span>الكمية المحتسبة</span><span class="v" id="calcQty">—</span></div>' +
+    '<div class="sect">السعر والشحن</div>' +
+    '<div class="g2"><div class="fld"><label>سعر ' + (P ? 'الشراء' : 'البيع') + ' للوحدة</label><input class="num-in" inputmode="decimal" type="text" data-ff="price" value="' + esc(F.price) + '"></div>' +
+    '<div class="fld"><label>إجمالي ثمن البضاعة</label><input class="num-in" inputmode="decimal" type="text" data-ff="goods" value="' + esc(F.goods) + '"></div></div>' +
+    '<div class="hint" id="lastPrice"></div>' +
+    '<div class="g2"><div class="fld"><label>خصم (اختياري)</label><input class="num-in" inputmode="decimal" type="text" data-ff="disc" value="' + esc(F.disc) + '"></div>' +
+    '<div class="fld"><label>' + (P ? 'ثمن النقل / الشحن' : 'تكلفة النقل / الشحن') + '</label><input class="num-in" inputmode="decimal" type="text" data-ff="ship" value="' + esc(F.ship) + '"></div></div>' +
+    '<div class="fld"><label>' + (P ? 'الشحن يُدفع' : 'الشحن على حساب') + '</label><div class="seg" id="shipseg">' + shipSegHtml() + '</div></div>' +
+    '<div class="totalbox"><span>إجمالي الفاتورة</span><span class="v num" id="totalv">0</span></div>' +
+    (F._edit ? '' : '<div class="sect">' + (P ? 'الدفع للمورد' : 'استلام الثمن') + '</div><div id="payblock">' + payBlockHtml() + '</div>') +
+    (F._edit ? '<div class="fld" id="dueWrap"><label>تاريخ الاستحقاق</label><input type="date" data-ff="due" value="' + esc(F.due) + '"></div>' : '') +
+    '<div class="fld" style="margin-top:12px"><label>ملاحظات</label><textarea data-ff="note" placeholder="أي تفاصيل إضافية">' + esc(F.note) + '</textarea></div>';
+}
+function colorsHtml() {
+  const known = C.COLORS.some(c => c[0] === F.color);
+  return C.COLORS.map(c => '<button type="button" class="col ' + (F.color === c[0] ? 'on' : '') + '" data-act="color" data-c="' + c[0] + '"><i style="background:' + c[1] + '"></i>' + c[0] + '</button>').join('') +
+    '<input type="text" data-ff="colorOther" placeholder="لون آخر…" style="max-width:130px;min-height:40px;padding:6px 10px;border-radius:999px" value="' + (F.color && !known ? esc(F.color) : '') + '">';
+}
+function shipSegHtml() {
+  const P = F.type === 'P';
+  return [['billed', P ? 'يضاف لفاتورة المورد' : 'على العميل (يُضاف للفاتورة)'], ['direct', P ? 'ندفعه للناقل مباشرة' : 'علينا (مصروف)']].map(x => '<button type="button" class="' + (F.shipMode === x[0] ? 'on' : '') + '" data-act="shipmode" data-m="' + x[0] + '">' + x[1] + '</button>').join('');
+}
+function payBlockHtml() {
+  const P = F.type === 'P';
+  return '<div class="row" style="margin-bottom:10px"><button type="button" class="btn grow ' + (F.payMode === 'full' ? (P ? 'pur' : 'sal') : 'line') + '" data-act="paymode" data-m="full">' + (P ? 'دفعنا كامل' : 'استلمنا كامل') + '</button>' +
+    '<button type="button" class="btn grow ' + (F.payMode === 'none' ? 'pri' : 'line') + '" data-act="paymode" data-m="none" style="' + (F.payMode === 'none' ? '' : '') + '">آجل</button>' +
+    '<button type="button" class="btn grow ' + (F.payMode === 'part' ? 'pri' : 'line') + '" data-act="paymode" data-m="part">دفعة جزئية</button></div>' +
+    '<div id="paydetail" class="' + (F.payMode === 'full' || F.payMode === 'part' ? '' : 'hide') + '"><div class="g2"><div class="fld"><label>المبلغ ' + (P ? 'المدفوع' : 'المستلم') + '</label><input class="num-in" inputmode="decimal" type="text" data-ff="paid" id="paidIn" value="' + esc(F.paid) + '"' + (F.payMode === 'full' ? ' readonly' : '') + '></div>' +
+    '<div class="fld"><label>تاريخ ' + (P ? 'الدفع' : 'الاستلام') + '</label><input type="date" data-ff="payDate" value="' + esc(F.payDate) + '"></div></div>' +
+    '<div class="lbl">' + (P ? 'طريقة الدفع' : 'طريقة استلام الثمن') + '</div><div class="chips" style="flex-wrap:wrap;overflow:visible">' + C.METHODS.map(m => '<button type="button" class="chip ' + (F.method === m ? 'on' : '') + '" data-act="method" data-m="' + m + '">' + m + '</button>').join('') + '</div></div>' +
+    '<div id="duebox" class="hide"><div class="lbl">تاريخ الاستحقاق للمتبقي <b id="remv" class="neg"></b></div><div class="chips" style="flex-wrap:wrap;overflow:visible">' + C.TERMS.map(d => '<button type="button" class="chip ' + (F.term === d ? 'on' : '') + '" data-act="term" data-d="' + d + '">' + (d === 0 ? 'اليوم' : d + ' يوم') + '</button>').join('') + '</div><div class="fld" style="margin-top:6px"><input type="date" data-ff="due" id="dueIn" value="' + esc(F.due) + '"></div></div>';
+}
+function formTotals() {
+  const qty = C.calcQty(F), price = C.parseNum(F.price), goods = C.parseNum(F.goods);
+  const g = isNaN(goods) ? 0 : goods;
+  const total = C.r2(g - num(F.disc) + (F.shipMode === 'billed' ? num(F.ship) : 0));
+  return { qty, g, total };
+}
+function recalc(initial) {
+  if (!F) return;
+  const qty = C.calcQty(F);
+  const price = C.parseNum(F.price), goods = C.parseNum(F.goods);
+  if (F._last === 'price' && !isNaN(price) && qty > 0) { F.goods = String(C.r2(qty * price)); const el = $('[data-ff=goods]'); if (el && document.activeElement !== el) el.value = F.goods; }
+  else if (F._last === 'goods' && !isNaN(goods) && qty > 0) { F.price = String(C.r4(goods / qty)); const el = $('[data-ff=price]'); if (el && document.activeElement !== el) el.value = F.price; }
+  const t = formTotals();
+  const cq = $('#calcQty'); if (cq) cq.textContent = qty > 0 ? fmtQty(qty) + ' ' + (F.unit ? C.UNITS[F.unit].label : '') : 'أكمل المقاسات';
+  const tv = $('#totalv'); if (tv) tv.textContent = fmt(t.total) + ' ' + C.CURRENCY;
+  if (!F._edit) {
+    if (F.payMode === 'full') { F.paid = String(t.total); const el = $('#paidIn'); if (el) el.value = F.paid; }
+    const paid = F.payMode === 'none' ? 0 : num(F.paid), rem = C.r2(t.total - paid);
+    const db = $('#duebox'), rv = $('#remv');
+    if (db) { db.classList.toggle('hide', !(rem > 0.009 && F.payMode)); }
+    if (rv) rv.textContent = '(' + fmt(rem) + ' ' + C.CURRENCY + ')';
+    if (F.term !== null && F.term !== undefined) { F.due = C.addDays(F.date, F.term); const di = $('#dueIn'); if (di) di.value = F.due; }
+  }
+  // last-price hint
+  const lp = $('#lastPrice');
+  if (lp && F.item && F.unit) {
+    const last = S.db.txns.filter(x => C.isActive(x) && x.type === F.type && x.item === F.item && x.unit === F.unit && x.id !== F.id && (!F.color || x.color === F.color) && num(x.price) > 0)
+      .sort((a, b) => (b.date + (b.at || '')).localeCompare(a.date + (a.at || '')))[0];
+    lp.innerHTML = last ? 'آخر سعر ' + (F.type === 'P' ? 'شراء' : 'بيع') + ' لنفس الصنف: <b>' + fmt(last.price) + '</b> للـ' + C.UNITS[F.unit].label + ' (' + C.shortDate(last.date) + ') <button type="button" data-act="useLast" data-p="' + last.price + '">استخدمه</button>' : '';
+  }
+}
+function setItem(name) {
+  const it = allItems().find(i => i.name === name); if (!it) return;
+  F.item = it.name; F.grp = it.grp;
+  const g = C.GROUPS[F.grp]; if (!g.units.includes(F.unit)) F.unit = g.def;
+  $('#dims').innerHTML = dimsHtml(); $('#unitseg').innerHTML = unitSegHtml(); recalc();
+}
+function saveForm() {
+  const P = F.type === 'P', t = formTotals();
+  const err = m => { toast(m, true); return null; };
+  if (!F.date) return err('حدد التاريخ');
+  if (!C.normName(F.party)) return err(P ? 'اكتب اسم المورد' : 'اكتب اسم الزبون');
+  if (!F.item) return err('اختر الصنف');
+  if (!F.unit) return err('اختر وحدة التسعير');
+  if (!(t.qty > 0)) return err('أكمل المقاسات/العدد ليتم حساب الكمية');
+  if (!(t.g > 0)) return err('أدخل السعر أو إجمالي ثمن البضاعة');
+  if (num(F.disc) > t.g) return err('الخصم أكبر من ثمن البضاعة');
+  let pays = [];
+  if (!F._edit) {
+    if (!F.payMode) return err(P ? 'حدد حالة الدفع: كامل / آجل / جزئي' : 'حدد حالة الاستلام: كامل / آجل / جزئي');
+    const paid = F.payMode === 'none' ? 0 : C.r2(num(F.paid));
+    if (F.payMode === 'part' && !(paid > 0)) return err('اكتب المبلغ المدفوع');
+    if (paid > t.total + 0.009) return err('المبلغ المدفوع أكبر من إجمالي الفاتورة');
+    if (paid > 0) { if (!F.method) return err('اختر طريقة الدفع'); if (!F.payDate) return err('حدد تاريخ الدفع'); pays = [{ id: C.uid('p'), tx: F.id, date: F.payDate, amt: paid, method: F.method }]; }
+    if (C.r2(t.total - paid) > 0.009 && !F.due) return err('حدد تاريخ الاستحقاق');
+    if (C.r2(t.total - paid) <= 0.009) F.due = '';
+  }
+  const tx = { id: F.id, type: F.type, date: F.date, party: C.normName(F.party), phone: String(F.phone || '').trim(), item: F.item, grp: F.grp, color: F.color || '', unit: F.unit,
+    thick: F.thick, width: F.width, length: F.length, count: F.count, tot: F.tot, dIn: F.dIn, dOut: F.dOut, arm1: F.arm1, arm2: F.arm2, face: F.face || '',
+    qty: t.qty, price: C.r4(num(F.price)), goods: C.r2(t.g), disc: C.r2(num(F.disc)), ship: C.r2(num(F.ship)), shipMode: F.shipMode, due: F.due || '', note: String(F.note || '').trim() };
+  ['thick', 'width', 'length', 'count', 'tot', 'dIn', 'dOut', 'arm1', 'arm2'].forEach(k => { const n = C.parseNum(tx[k]); tx[k] = isNaN(n) ? '' : n; });
+  closeSheet();
+  commit([{ op: 'saveTx', tx, pays }]);
+  toast('تم الحفظ ✓');
+  return true;
+}
+
+/* ---------- detail & payments ---------- */
+function openDetail(id) {
+  const t = getTx(id); if (!t) return;
+  const idx = C.buildIndex(S.db), st = C.txState(idx, t), P = t.type === 'P', void_ = t.status === 'void';
+  const pays = (idx.pays.get(id) || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+  const kv = (k, v) => v === '' || v === undefined ? '' : '<div class="kv"><span class="k">' + k + '</span><b style="text-align:left">' + v + '</b></div>';
+  const body = '<div class="card">' +
+    kv('التاريخ', C.DAYS[C.dow(t.date)] + ' ' + C.longDate(t.date)) + kv(P ? 'المورد' : 'الزبون', esc(t.party)) +
+    (t.phone ? kv('الهاتف', '<a href="tel:' + esc(digits(t.phone)) + '" class="num">' + esc(t.phone) + '</a>') : '') +
+    kv('الصنف', esc(t.item)) + kv('اللون', t.color ? swatch(t.color) + esc(t.color) : '') + kv('المواصفات', esc(C.describeSpec(t))) +
+    kv('الكمية', Q(num(t.qty) || C.calcQty(t), t.unit)) + kv('السعر', M(t.price) + ' / ' + U(t.unit)) + kv('ثمن البضاعة', M(t.goods)) +
+    (num(t.disc) ? kv('خصم', '−' + M(t.disc)) : '') + (num(t.ship) ? kv('الشحن', M(t.ship) + ' <span class="xs muted">(' + (t.shipMode === 'billed' ? 'على الفاتورة' : (P ? 'مدفوع للناقل' : 'علينا') ) + ')</span>') : '') +
+    '<div class="kv tot"><span>إجمالي الفاتورة</span><b>' + M(st.total) + '</b></div>' +
+    kv('المدفوع', M(st.paid)) + '<div class="kv"><span class="k">المتبقي</span><b>' + M(st.rem) + ' ' + (void_ ? sBadge('void') : sBadge(st.st)) + '</b></div>' +
+    (st.rem > 0.009 ? kv('الاستحقاق', C.longDate(st.due) + ' · ' + dueText(st)) : '') + kv('ملاحظات', esc(t.note)) +
+    '<div class="muted xs" style="margin-top:8px">سجّله ' + esc(t.by || '—') + ' · ' + esc(String(t.at || '').replace('T', ' ')) + (t.upd ? ' · عُدّل ' + esc(t.upd) : '') + '</div></div>' +
+    '<div class="card"><h3>' + (P ? 'الدفعات' : 'التحصيلات') + ' (' + pays.filter(C.isActive).length + ')</h3>' +
+    (pays.length ? pays.map(p => '<div class="kv" style="' + (p.status === 'void' ? 'opacity:.5;text-decoration:line-through' : '') + '"><span>' + C.longDate(p.date) + ' · ' + esc(p.method || '') + '<div class="xs muted">' + esc(p.by || '') + '</div></span><span><b>' + M(p.amt) + '</b> ' + (isAdmin() && p.status !== 'void' && !void_ ? '<button class="btn bad sm" style="min-height:30px;padding:2px 10px" data-act="voidPay" data-id="' + esc(p.id) + '">إلغاء</button>' : '') + '</span></div>').join('') : '<div class="muted sm">لا توجد دفعات.</div>') + '</div>';
+  const foot = void_ ? '' : (st.rem > 0.009 && canWrite() ? '<button class="btn ' + (P ? 'pur' : 'sal') + '" data-act="pay" data-id="' + esc(id) + '">' + (P ? 'تسجيل سداد' : 'تسجيل تحصيل') + '</button>' : '') +
+    (canWrite() ? '<button class="btn ghost" data-act="copy" data-id="' + esc(id) + '" style="flex:0 0 auto">نسخ</button>' : '') +
+    (isAdmin() ? '<button class="btn ghost" data-act="edit" data-id="' + esc(id) + '" style="flex:0 0 auto">تعديل</button><button class="btn bad" data-act="voidTx" data-id="' + esc(id) + '" style="flex:0 0 auto">إلغاء</button>' : '');
+  openSheet('<span class="tag ' + t.type + '">' + (P ? 'شراء' : 'بيع') + '</span> ' + esc(t.party), body, foot);
+}
+function openPay(id) {
+  const t = getTx(id); if (!t) return; const idx = C.buildIndex(S.db), st = C.txState(idx, t), P = t.type === 'P';
+  window._pay = { id, method: 'كاش' };
+  openSheet((P ? 'تسجيل سداد — ' : 'تسجيل تحصيل — ') + esc(t.party),
+    '<div class="card"><div class="kv"><span class="k">إجمالي الفاتورة</span><b>' + M(st.total) + '</b></div><div class="kv"><span class="k">المتبقي</span><b class="neg">' + M(st.rem) + '</b></div></div>' +
+    '<div class="g2"><div class="fld"><label>المبلغ</label><input class="num-in" inputmode="decimal" type="text" id="payAmt" value="' + st.rem + '"></div><div class="fld"><label>التاريخ</label><input type="date" id="payDate" value="' + today() + '"></div></div>' +
+    '<div class="lbl">الطريقة</div><div class="chips" style="flex-wrap:wrap;overflow:visible" id="payMethods">' + C.METHODS.map(m => '<button type="button" class="chip ' + (m === 'كاش' ? 'on' : '') + '" data-act="payMethod" data-m="' + m + '">' + m + '</button>').join('') + '</div>' +
+    '<div class="fld"><label>ملاحظة</label><input type="text" id="payNote"></div>',
+    '<button class="btn ' + (P ? 'pur' : 'sal') + '" data-act="savePay">💾 حفظ</button><button class="btn ghost" data-act="close" style="flex:0 0 90px">إلغاء</button>');
+}
+function savePayForm() {
+  const p = window._pay, t = getTx(p.id), idx = C.buildIndex(S.db), st = C.txState(idx, t);
+  const amt = C.r2(C.parseNum($('#payAmt').value)), date = $('#payDate').value;
+  if (!(amt > 0)) return toast('اكتب مبلغًا صحيحًا', true);
+  if (!date) return toast('حدد التاريخ', true);
+  if (amt > st.rem + 0.009 && !confirm('المبلغ أكبر من المتبقي (' + fmt(st.rem) + '). متابعة؟')) return;
+  const pay = { id: C.uid('p'), tx: p.id, date, amt, method: p.method, note: $('#payNote').value.trim() };
+  closeSheet(); commit([{ op: 'savePay', pay }]); toast('تم تسجيل الدفعة ✓');
+}
+
+/* ---------- sharing / export ---------- */
+function openWA(text, phone) { window.open('https://wa.me/' + (phone || '') + '?text=' + encodeURIComponent(text), '_blank'); }
+function remindText(p) {
+  const L = ['السلام عليكم أ/ ' + p.name + '،', 'نذكّركم بالمستحقات التالية لدينا:'];
+  p.items.forEach(i => L.push('• فاتورة ' + C.longDate(i.t.date) + ' (' + i.t.item + '): ' + fmt(i.s.rem) + ' ' + C.CURRENCY + ' — استحقاق ' + C.longDate(i.s.due)));
+  L.push('الإجمالي: ' + fmt(p.rem) + ' ' + C.CURRENCY, 'شاكرين تعاونكم 🌷'); return L.join('\n');
+}
+function csvEscape(v) { v = String(v === undefined || v === null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function exportCsv() {
+  const idx = C.buildIndex(S.db);
+  const head = ['التاريخ', 'النوع', 'الطرف', 'الهاتف', 'الصنف', 'اللون', 'المواصفات', 'الوحدة', 'الكمية', 'سعر الوحدة', 'ثمن البضاعة', 'خصم', 'شحن', 'نمط الشحن', 'إجمالي الفاتورة', 'المدفوع', 'المتبقي', 'الاستحقاق', 'الحالة', 'ملاحظات', 'سجّله'];
+  const rows = S.db.txns.slice().sort((a, b) => a.date < b.date ? -1 : 1).map(t => { const s = C.txState(idx, t); return [t.date, t.type === 'P' ? 'شراء' : 'بيع', t.party, t.phone, t.item, t.color, C.describeSpec(t), C.UNITS[t.unit] ? C.UNITS[t.unit].label : t.unit, t.qty, t.price, t.goods, t.disc, t.ship, t.shipMode === 'billed' ? 'على الفاتورة' : 'منفصل', s.total, s.paid, s.rem, t.due, t.status === 'void' ? 'ملغى' : STATE_LBL[s.st], t.note, t.by]; });
+  const csv = '﻿' + [head, ...rows].map(r => r.map(csvEscape).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'foam-transactions-' + today() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- settings ---------- */
+function openSettings() {
+  const r = remote();
+  openSheet('⚙ الإعدادات',
+    '<div class="card"><h3>🔗 الملف المشترك (Google Sheet)</h3><div class="fld"><label>رابط تطبيق الويب (Apps Script)</label><input type="url" id="setUrl" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(S.set.url) + '"></div>' +
+    '<div class="fld"><label>الرقم السري</label><input type="password" id="setPin" dir="ltr" autocomplete="off" value="' + esc(S.set.pin) + '"></div>' +
+    '<button class="btn block" data-act="connect">اتصال وحفظ</button>' +
+    (r && S.set.user ? '<div class="hint">المتصل: <b>' + esc(S.set.user) + '</b> · الصلاحية: ' + ({ admin: 'مدير', entry: 'إدخال', view: 'عرض' }[S.set.role] || '') + (S.out.length ? ' · ' + S.out.length + ' عملية بانتظار المزامنة' : '') + '</div>' : '') +
+    (!r ? '<div class="hint">بدون رابط يعمل التطبيق <b>محليًا</b> على هذا الجهاز فقط (غير مشترك).</div>' : '') + '</div>' +
+    '<div class="card"><h3>🧰 أدوات</h3><div class="row wrap"><button class="btn ghost sm" data-act="csv">⬇ تصدير الحركات Excel</button>' + (r ? '<button class="btn ghost sm" data-act="syncNow">🔄 مزامنة الآن</button><button class="btn bad sm" data-act="logout">تسجيل خروج</button>' : '<button class="btn ghost sm" data-act="seed">🧪 بيانات تجريبية</button><button class="btn bad sm" data-act="wipe">مسح بيانات الجهاز</button>') + '</div></div>', '');
+}
+async function connect() {
+  const url = $('#setUrl').value.trim(), pin = $('#setPin').value.trim();
+  if (!url) { S.set.url = ''; S.set.pin = ''; persist(); closeSheet(); setStatus('loc'); render(); return toast('تم العمل في الوضع المحلي'); }
+  if (!/^https:\/\/script\.google\.com\//.test(url)) return toast('الرابط يجب أن يبدأ بـ https://script.google.com/', true);
+  if (!pin) return toast('اكتب الرقم السري', true);
+  const prev = Object.assign({}, S.set); S.set.url = url; S.set.pin = pin; setStatus('wait');
+  try {
+    const r = await api('login');
+    if (!r.ok) { S.set = prev; setStatus(prev.url ? 'ok' : 'loc'); return toast(r.error || 'فشل الاتصال', true); }
+    S.set.user = r.user; S.set.role = r.role;
+    const hadLocal = !prev.url && S.db.txns.length > 0;
+    if (hadLocal) {
+      if (confirm('يوجد ' + S.db.txns.length + ' حركة مسجلة محليًا على هذا الجهاز. هل ترفعها إلى الملف المشترك؟\n(إن كانت بيانات تجريبية اختر إلغاء ثم امسحها من الإعدادات)')) {
+        S.out = S.db.txns.map(t => ({ op: 'saveTx', tx: t, pays: S.db.pays.filter(p => p.tx === t.id) }));
+      } else { S.db = { txns: [], pays: [] }; }
+    } else { S.db = { txns: [], pays: [] }; }
+    persist(); closeSheet(); toast('تم الاتصال ✓ ' + r.user);
+    if (S.out.length) await flush(); else await refresh();
+    render();
+  } catch (e) { S.set = prev; setStatus(prev.url ? 'off' : 'loc'); toast('تعذر الوصول للرابط — تحقق من النشر "أي شخص" ومن اتصال الإنترنت', true); }
+}
+function seedDemo() {
+  const td = today(), mk = (o) => Object.assign({ status: 'active', grp: 'sheet', shipMode: 'billed', disc: 0, ship: 0, by: 'تجريبي', at: '2026-01-01T00:00:00' }, o);
+  const txns = [], pays = []; let n = 0;
+  const add = (type, back, party, phone, item, grp, color, unit, dims, price, ship, shipMode, paidPct, method, term) => {
+    const t = mk(Object.assign({ id: 'demo' + (++n), type, date: C.addDays(td, -back), party, phone, item, grp, color, unit, price, ship, shipMode, thick: '', width: '', length: '', count: '', tot: '', dIn: '', dOut: '', arm1: '', arm2: '', face: '' }, dims));
+    t.qty = C.calcQty(t); t.goods = C.r2(t.qty * price); t.due = C.addDays(t.date, term);
+    txns.push(t); const tot = C.invoiceTotal(t), paid = C.r2(tot * paidPct);
+    if (paid > 0) pays.push({ id: 'dp' + n, tx: t.id, date: t.date, amt: paid, method, status: 'active', by: 'تجريبي', at: t.at });
+  };
+  add('P', 55, 'مصنع الدلتا للفوم', '01011112222', 'فوم بولي إيثيلين - رولات', 'roll', 'أبيض', 'roll', { thick: 5, width: 1, length: 50, count: 40 }, 1450, 1200, 'billed', 0.5, 'تحويل بنكي', 45);
+  add('P', 50, 'شركة النيل', '01022223333', 'ألواح الفوم الأبيض', 'sheet', 'أبيض', 'm3', { thick: 20, width: 1, length: 2, count: 300 }, 5200, 800, 'direct', 1, 'كاش', 0);
+  add('P', 40, 'مصنع شنغهاي', '', 'ألواح فوم إيفا (EVA)', 'eva', 'أسود', 'm2', { thick: 5, width: 1, length: 2, count: 120, face: 'وجه ناعم + وجه خشن' }, 210, 1500, 'billed', 0, 'شيك', 60);
+  add('P', 25, 'مصنع الدلتا للفوم', '01011112222', 'مواسير فوم بولي إيثيلين - مفرغة', 'pipeH', 'رمادي', 'lm', { dIn: 20, dOut: 30, length: 2, count: 400 }, 14, 600, 'billed', 0.3, 'محفظة إلكترونية', 30);
+  add('P', 10, 'شركة النيل', '01022223333', 'ألواح الفوم الأبيض', 'sheet', 'أبيض', 'm3', { thick: 20, width: 1, length: 2, count: 200 }, 5400, 500, 'billed', 0, 'كاش', 30);
+  add('S', 45, 'شركة الأمل للتغليف', '01099998888', 'فوم بولي إيثيلين - رولات', 'roll', 'أبيض', 'roll', { thick: 5, width: 1, length: 50, count: 15 }, 2100, 300, 'billed', 1, 'إنستا باي', 0);
+  add('S', 30, 'أ. سعيد الحداد', '01122334455', 'ألواح الفوم الأبيض', 'sheet', 'أبيض', 'm3', { thick: 20, width: 1, length: 2, count: 100 }, 7000, 400, 'direct', 0.4, 'كاش', 30);
+  add('S', 22, 'مؤسسة النور', '01234567890', 'ألواح فوم إيفا (EVA)', 'eva', 'أسود', 'm2', { thick: 5, width: 1, length: 2, count: 40 }, 290, 0, 'billed', 0, 'كاش', 21);
+  add('S', 12, 'شركة الأمل للتغليف', '01099998888', 'مواسير فوم بولي إيثيلين - مفرغة', 'pipeH', 'رمادي', 'lm', { dIn: 20, dOut: 30, length: 2, count: 150 }, 20, 0, 'billed', 0.5, 'محفظة إلكترونية', 15);
+  add('S', 4, 'أ. سعيد الحداد', '01122334455', 'ألواح الفوم الأبيض', 'sheet', 'أبيض', 'm3', { thick: 20, width: 1, length: 2, count: 120 }, 7100, 350, 'billed', 0, 'كاش', 30);
+  add('S', 1, 'مؤسسة النور', '01234567890', 'فوم بولي إيثيلين - رولات', 'roll', 'أبيض', 'roll', { thick: 5, width: 1, length: 50, count: 10 }, 2150, 0, 'billed', 1, 'كاش', 0);
+  S.db = { txns, pays }; persist(); render(); toast('تم تحميل بيانات تجريبية');
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, d = el.dataset;
+  switch (a) {
+    case 'tab': S.tab = d.tab; closeSheet(); render(); window.scrollTo(0, 0); break;
+    case 'new': openForm(d.type); break;
+    case 'close': closeSheet(); break;
+    case 'detail': openDetail(d.id); break;
+    case 'txf': S.tx.f = d.f; render(); break;
+    case 'side': S.due.side = d.side; render(); break;
+    case 'goDue': S.due.side = d.side; S.tab = 'dues'; render(); window.scrollTo(0, 0); break;
+    case 'rkind': S.rep.kind = d.k; S.rep.off = 0; if (d.k === 'custom' && !S.rep.custom.from) { const r = C.getRange('month', today(), 0); S.rep.custom = { from: r.start, to: today() }; } render(); break;
+    case 'roff': S.rep.off += +d.d; render(); break;
+    case 'rsub': S.rep.sub = d.s; render(); break;
+    case 'bycolor': S.rep.byColor = !S.rep.byColor; render(); break;
+    case 'share': openWA(reportText(window._lastReport.R, window._lastReport.r)); break;
+    case 'print': window.print(); break;
+    case 'csv': exportCsv(); break;
+    case 'pay': openPay(d.id); break;
+    case 'payMethod': window._pay.method = d.m; $$('#payMethods .chip').forEach(c => c.classList.toggle('on', c.dataset.m === d.m)); break;
+    case 'savePay': savePayForm(); break;
+    case 'remind': { const side = C.position(S.db, today()).ar; const p = side.parties.get(d.party); if (p) openWA(remindText(p), waNumber(p.phone)); break; }
+    case 'stmt': S.rep.sub = 'stmt'; S.rep.stParty = d.type + '|' + d.party; S.tab = 'reports'; closeSheet(); render(); window.scrollTo(0, 0); break;
+    case 'shareStmt': {
+      const [type, key] = S.rep.stParty.split('|'), st = C.statement(S.db, type, key), nm = (S.db.txns.find(t => t.type === type && C.nameKey(t.party) === key) || {}).party || '';
+      const L = ['كشف حساب — ' + nm, ''];
+      st.rows.forEach(r => L.push(C.shortDate(r.date) + '  ' + (r.kind === 'inv' ? r.t.item + ' : ' + fmt(r.debit) : 'دفعة ' + (r.p.method || '') + ' : −' + fmt(r.credit)) + '  | الرصيد ' + fmt(r.bal)));
+      L.push('', 'الرصيد المستحق: ' + fmt(st.balance) + ' ' + C.CURRENCY); openWA(L.join('\n')); break; }
+    case 'edit': { const t = getTx(d.id); closeSheet(); openForm(t.type, t); break; }
+    case 'copy': { const t = getTx(d.id); closeSheet(); openForm(t.type, t, true); break; }
+    case 'voidTx': if (confirm('إلغاء هذه الحركة؟ ستبقى في السجل كملغاة ولن تُحتسب في التقارير.')) { closeSheet(); commit([{ op: 'voidTx', id: d.id }]); toast('تم الإلغاء'); } break;
+    case 'voidPay': if (confirm('إلغاء هذه الدفعة؟')) { const p = S.db.pays.find(x => x.id === d.id); closeSheet(); commit([{ op: 'voidPay', id: d.id }]); toast('تم إلغاء الدفعة'); if (p) openDetail(p.tx); } break;
+    case 'settings': openSettings(); break;
+    case 'connect': connect(); break;
+    case 'syncNow': flush().then(() => toast('تمت المزامنة')); break;
+    case 'logout': S.set.pin = ''; S.set.user = ''; S.db = { txns: [], pays: [] }; S.out = []; persist(); closeSheet(); render(); openSettings(); break;
+    case 'seed': seedDemo(); closeSheet(); break;
+    case 'wipe': if (confirm('مسح كل بيانات هذا الجهاز؟ لا يمكن التراجع.')) { S.db = { txns: [], pays: [] }; persist(); closeSheet(); render(); } break;
+    // form
+    case 'save': saveForm(); break;
+    case 'color': F.color = d.c; $('#colors').innerHTML = colorsHtml(); recalc(); break;
+    case 'unit': F.unit = d.u; $('#unitseg').innerHTML = unitSegHtml(); $('#dims').innerHTML = dimsHtml(); recalc(); break;
+    case 'shipmode': F.shipMode = d.m; $('#shipseg').innerHTML = shipSegHtml(); recalc(); break;
+    case 'paymode': F.payMode = d.m; if (d.m === 'none') F.paid = ''; if (d.m === 'part' && F.paid && num(F.paid) === formTotals().total) F.paid = ''; $('#payblock').innerHTML = payBlockHtml(); recalc(); break;
+    case 'method': F.method = d.m; $$('#payblock .chip[data-act=method]').forEach(c => c.classList.toggle('on', c.dataset.m === d.m)); break;
+    case 'term': F.term = +d.d; $$('#duebox .chip').forEach(c => c.classList.toggle('on', +c.dataset.d === F.term)); recalc(); break;
+    case 'useLast': F.price = d.p; F._last = 'price'; $('[data-ff=price]').value = F.price; recalc(); break;
+    case 'addItem': { const n = C.normName($('#niName').value); if (!n) return toast('اكتب اسم الصنف', true); const g = $('#niGrp').value; F.item = n; F.grp = g; const gg = C.GROUPS[g]; if (!gg.units.includes(F.unit)) F.unit = gg.def; const sel = $('[data-ff=item]'); sel.insertAdjacentHTML('afterbegin', '<option selected>' + esc(n) + '</option>'); sel.value = n; $('#newitem').classList.add('hide'); $('#dims').innerHTML = dimsHtml(); $('#unitseg').innerHTML = unitSegHtml(); recalc(); break; }
+  }
+});
+function onField(ev, isChange) {
+  const el = ev.target;
+  if (el.dataset.ff && F) {
+    const k = el.dataset.ff, v = el.value;
+    if (k === 'item') { if (v === '__new') { $('#newitem').classList.remove('hide'); el.value = F.item || ''; return; } if (isChange) setItem(v); return; }
+    if (k === 'colorOther') { F.color = v.trim(); $$('#colors .col').forEach(c => c.classList.remove('on')); return; }
+    F[k] = v;
+    if (k === 'price') F._last = 'price'; if (k === 'goods') F._last = 'goods';
+    if (k === 'paid') F.payMode = F.payMode === 'full' ? 'part' : F.payMode;
+    if (k === 'due') { F.term = null; $$('#duebox .chip').forEach(c => c.classList.remove('on')); }
+    if (k === 'party' && isChange && !F.phone) { const p = partyNames(F.type).find(x => C.nameKey(x.name) === C.nameKey(v)); if (p && p.phone) { F.phone = p.phone; const ph = $('[data-ff=phone]'); if (ph) ph.value = p.phone; } }
+    if (k === 'date' && F.term !== null && F.term !== undefined) { /* due follows date */ }
+    if (k === 'paid' && F.payMode === 'part') { /* keep */ }
+    recalc();
+    return;
+  }
+  const f = el.dataset.f; if (!f) return;
+  if (f === 'txq') { S.tx.q = el.value; render(); }
+  else if (f === 'cfrom') { S.rep.custom.from = el.value; render(); } else if (f === 'cto') { S.rep.custom.to = el.value; render(); }
+  else if (f === 'stparty') { S.rep.stParty = el.value; render(); }
+}
+document.addEventListener('input', ev => onField(ev, false));
+document.addEventListener('change', ev => onField(ev, true));
+
+/* ===== APP: boot ===== */
+function boot() {
+  document.body.innerHTML =
+    '<header class="top"><h1>🧽 سجل الفوم</h1><span class="sync" id="sync"></span><button class="iconbtn" data-act="settings" aria-label="الإعدادات">⚙</button></header>' +
+    '<main id="main"></main>' +
+    '<nav class="bar">' +
+    '<button data-act="tab" data-tab="home"><span class="ic">🏠</span>الرئيسية</button>' +
+    '<button data-act="tab" data-tab="tx"><span class="ic">🧾</span>الحركات</button>' +
+    '<button class="fab" data-act="new" data-type="P" id="fabBtn" aria-label="إضافة"><span class="circ">＋</span></button>' +
+    '<button data-act="tab" data-tab="dues"><span class="ic">💳</span>المستحقات<span class="pill hide" id="pill">!</span></button>' +
+    '<button data-act="tab" data-tab="reports"><span class="ic">📊</span>التقارير</button></nav>';
+  // the center + opens a chooser (purchase / sale)
+  $('#fabBtn').dataset.act = 'chooser';
+  render();
+  if (remote()) { if (!S.set.pin) openSettings(); else { setStatus(S.out.length ? 'wait' : 'ok'); flush().then(() => refresh(true)); } }
+  setInterval(poll, 45000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+  window.addEventListener('online', () => flush());
+}
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act=chooser]'); if (!el) return;
+  if (!canWrite()) return toast('صلاحيتك عرض فقط', true);
+  openSheet('ماذا تريد أن تسجل؟', '<div class="grid2"><button class="btn pur" style="min-height:90px;font-size:1.2rem" data-act="new" data-type="P">🛒<br>شراء</button><button class="btn sal" style="min-height:90px;font-size:1.2rem" data-act="new" data-type="S">💰<br>بيع</button></div>', '');
+});
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+
+
+})();
+</script>
+</body>
+</html>
